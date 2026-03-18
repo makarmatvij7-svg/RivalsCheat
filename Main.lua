@@ -4,10 +4,9 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local plr = Players.LocalPlayer
-local camera = workspace.CurrentCamera
 
 local state = {
-    NoRecoil = false, NoSpread = false, AutoDrop = false, SilentAim = false
+    NoRecoil = false, NoSpread = false, AutoDrop = false
 }
 local cachedTables = {}
 
@@ -42,45 +41,6 @@ local function restoreAttribute(attribute)
     cachedTables[attribute] = nil
 end
 
-local function getClosestTarget()
-    local closest, closestDist = nil, math.huge
-    local center = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= plr and p.Character then
-            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-            local hum = p.Character:FindFirstChild("Humanoid")
-            if hrp and hum and hum.Health > 0 then
-                local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
-                if onScreen then
-                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
-                    if dist < closestDist then closestDist = dist closest = p end
-                end
-            end
-        end
-    end
-    return closest
-end
-
-local mt = getrawmetatable(game)
-local oldIndex = mt.__index
-setreadonly(mt, false)
-mt.__index = newcclosure(function(self, key)
-    if state.SilentAim and self == UserInputService and key == "GetMouseLocation" then
-        local target = getClosestTarget()
-        if target and target.Character then
-            local hrp = target.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
-                if onScreen then
-                    return function() return Vector2.new(screenPos.X, screenPos.Y) end
-                end
-            end
-        end
-    end
-    return oldIndex(self, key)
-end)
-setreadonly(mt, true)
-
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CheatMenu"
 screenGui.ResetOnSpawn = false
@@ -88,7 +48,7 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = plr:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 220, 0, 220)
+frame.Size = UDim2.new(0, 220, 0, 178)
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(10, 10, 14)
 frame.BorderSizePixel = 0
@@ -195,14 +155,13 @@ local function createToggle(labelText, key, order, onEnable, onDisable)
     end)
 end
 
-createToggle("No Recoil",           "NoRecoil",  1,
+createToggle("No Recoil",           "NoRecoil", 1,
     function() applyAttribute("ShootRecoil", 0) end,
     function() restoreAttribute("ShootRecoil") end)
-createToggle("No Spread",           "NoSpread",  2,
+createToggle("No Spread",           "NoSpread", 2,
     function() applyAttribute("ShootSpread", 0) applyAttribute("ShootCooldown", 0) end,
     function() restoreAttribute("ShootSpread") restoreAttribute("ShootCooldown") end)
-createToggle("Auto Drop Collector", "AutoDrop",  3, nil, nil)
-createToggle("Silent Aim",          "SilentAim", 4, nil, nil)
+createToggle("Auto Drop Collector", "AutoDrop", 3, nil, nil)
 
 local dragging, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
