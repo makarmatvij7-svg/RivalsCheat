@@ -7,8 +7,7 @@ local plr = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
 local state = {
-    NoRecoil = false, NoSpread = false, AutoDrop = false,
-    SilentAim = false, Ragebot = false
+    NoRecoil = false, NoSpread = false, AutoDrop = false, SilentAim = false
 }
 local cachedTables = {}
 
@@ -82,41 +81,6 @@ mt.__index = newcclosure(function(self, key)
 end)
 setreadonly(mt, true)
 
-local oldRaycast = nil
-local ragebotActive = false
-
-local function enableRagebot()
-    if oldRaycast then return end
-    ragebotActive = true
-    oldRaycast = hookfunction(workspace.Raycast, newcclosure(function(self, origin, direction, params)
-        if not ragebotActive then return oldRaycast(self, origin, direction, params) end
-        local target = getClosestTarget()
-        if target and target.Character then
-            local hrp = target.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local newDir = (hrp.Position - origin).Unit * direction.Magnitude
-                local wallbreakParams = RaycastParams.new()
-                wallbreakParams.FilterType = Enum.RaycastFilterType.Include
-                wallbreakParams.FilterDescendantsInstances = { target.Character }
-                local ok, result = pcall(oldRaycast, self, origin, newDir, wallbreakParams)
-                if ok and result then return result end
-                local ok2, result2 = pcall(oldRaycast, self, origin, newDir * 10, wallbreakParams)
-                if ok2 and result2 then return result2 end
-            end
-        end
-        local ok, result = pcall(oldRaycast, self, origin, direction, params)
-        if ok then return result end
-    end))
-end
-
-local function disableRagebot()
-    ragebotActive = false
-    if oldRaycast then
-        hookfunction(workspace.Raycast, oldRaycast)
-        oldRaycast = nil
-    end
-end
-
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CheatMenu"
 screenGui.ResetOnSpawn = false
@@ -124,7 +88,7 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = plr:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 220, 0, 262)
+frame.Size = UDim2.new(0, 220, 0, 220)
 frame.Position = UDim2.new(0, 20, 0, 20)
 frame.BackgroundColor3 = Color3.fromRGB(10, 10, 14)
 frame.BorderSizePixel = 0
@@ -239,7 +203,6 @@ createToggle("No Spread",           "NoSpread",  2,
     function() restoreAttribute("ShootSpread") restoreAttribute("ShootCooldown") end)
 createToggle("Auto Drop Collector", "AutoDrop",  3, nil, nil)
 createToggle("Silent Aim",          "SilentAim", 4, nil, nil)
-createToggle("Ragebot",             "Ragebot",   5, enableRagebot, disableRagebot)
 
 local dragging, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
