@@ -181,6 +181,7 @@ local function verifyKey()
         task.wait(0.35)
         keyGui:Destroy()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/makarmatvij7-svg/RivalsCheat/main/Main.lua", true))()
+        
     else
         statusLbl.TextColor3 = Color3.fromRGB(255, 60, 60)
         statusLbl.Text = "✗ Invalid key. Try again."
