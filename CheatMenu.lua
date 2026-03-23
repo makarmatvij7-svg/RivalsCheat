@@ -6,7 +6,7 @@ local plr = Players.LocalPlayer
 local KEY_URL = "https://raw.githubusercontent.com/makarmatvij7-svg/RivalsCheat/main/keys.txt"
 
 local validKeys = {}
-local fetchSuccess = false
+local fetchSuccess = true
 
 local ok, result = pcall(function()
     local data = game:HttpGet(KEY_URL, true)
