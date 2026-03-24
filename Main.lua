@@ -687,7 +687,7 @@ local C = {
 }
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CyberCheat"
+screenGui.Name = "🐉CyberDragon🐉"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = plr:WaitForChild("PlayerGui")
@@ -722,7 +722,7 @@ Instance.new("UICorner",titleAccent).CornerRadius=UDim.new(1,0)
 
 local titleLbl = Instance.new("TextLabel")
 titleLbl.Size=UDim2.new(1,-80,1,0) titleLbl.Position=UDim2.new(0,18,0,0)
-titleLbl.BackgroundTransparency=1 titleLbl.Text="◈ CYBER CHEAT"
+titleLbl.BackgroundTransparency=1 titleLbl.Text="🐉CyberDragon🐉"
 titleLbl.TextColor3=C.neon titleLbl.TextSize=12 titleLbl.Font=Enum.Font.GothamBold
 titleLbl.TextXAlignment=Enum.TextXAlignment.Left titleLbl.Parent=titleBar
 
