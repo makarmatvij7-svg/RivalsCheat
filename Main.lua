@@ -687,7 +687,7 @@ local C = {
 }
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CyberCheat"
+screenGui.Name = "🐉CyberDragon🐉"
 screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = plr:WaitForChild("PlayerGui")
