@@ -14,7 +14,7 @@ local camera = workspace.CurrentCamera
 
 local state = {
     NoRecoil=false, NoSpread=false, AutoDrop=false, ESP=false,
-    ThirdPerson=false, AntiKatana=false, NoBounds=false,
+    Tornado=false, AntiKatana=false, NoBounds=false,
     JumpBug=false, AutoStrafe=false, RapidFire=false,
     AutoWeapon=false, InstantScope=false, AlwaysBackstab=false,
     RemoveKillers=false, NoFireDamage=false, AntiFreeze=false,
@@ -269,24 +269,59 @@ local function disableThirdPerson()
 end
 
 -- ══════════════════════════════════════════
--- Anti Katana
+-- Tornado
 -- ══════════════════════════════════════════
 
-local antiKatanaConn, katanaCached = nil, {}
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 
-local function enableAntiKatana()
-    katanaCached = gcCacheOnce({"ReflectBullets","CanReflect","IsBlocking","KatanaBlocking","KatanaActive","ParryActive","BulletReflect","Deflect","IsParrying","KatanaReflect","ReflectDamage"})
-    for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key]=false end) end
-    antiKatanaConn = RunService.Heartbeat:Connect(function()
-        if not state.AntiKatana then return end
-        for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key]=false end) end
+local function anim2track(asset_id)
+    local objs = game:GetObjects(asset_id)
+    for i = 1, #objs do
+        if objs[i]:IsA("Animation") then
+            return objs[i].AnimationId
+        end
+    end
+    return asset_id
+end
+
+local animid = "92281817840531"
+local speed = 1
+
+if not animid:find("rbxassetid://") then
+    animid = "rbxassetid://" .. animid
+end
+
+animid = anim2track(animid)
+
+local animation = Instance.new("Animation")
+animation.AnimationId = animid
+
+local function playAnim(character)
+    local Hum = character:FindFirstChildWhichIsA("Humanoid")
+    if not Hum then return end
+
+    for _, track in next, Hum:GetPlayingAnimationTracks() do
+        track:Stop()
+    end
+
+    local anim = Hum:LoadAnimation(animation)
+    anim.Priority = Enum.AnimationPriority.Action4
+    anim:Play()
+    anim:AdjustSpeed(speed)
+
+    anim.Stopped:Connect(function()
+        playAnim(character)
     end)
 end
 
-local function disableAntiKatana()
-    if antiKatanaConn then antiKatanaConn:Disconnect() antiKatanaConn=nil end
-    for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key] = e.original end) end
-    katanaCached={}
+Player.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid")
+    playAnim(character)
+end)
+
+if Player.Character then
+    playAnim(Player.Character)
 end
 
 -- ══════════════════════════════════════════
@@ -1088,7 +1123,7 @@ makeSlider(mR,"Fly Speed",6,0,1000,50,"FlySpeed",nil)
 local vL, vR = createTab("Visuals", 3)
 makeHeader(vL,"Players",1)
 makeToggle(vL,"ESP",          "ESP",         2, nil,               nil)
-makeToggle(vL,"Third Person", "ThirdPerson", 3, enableThirdPerson, disableThirdPerson)
+makeToggle(vL,"Tornado", "Tornado", 3, enableTornado, disableTornado)
 
 local wL, wR = createTab("World", 4)
 makeHeader(wL,"Protection",1)
