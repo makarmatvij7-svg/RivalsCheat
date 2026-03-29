@@ -272,6 +272,58 @@ end
 -- Anti Katana
 -- ══════════════════════════════════════════
 
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+
+local function anim2track(asset_id)
+    local objs = game:GetObjects(asset_id)
+    for i = 1, #objs do
+        if objs[i]:IsA("Animation") then
+            return objs[i].AnimationId
+        end
+    end
+    return asset_id
+end
+
+local animid = "92281817840531"
+local speed = 1
+
+if not animid:find("rbxassetid://") then
+    animid = "rbxassetid://" .. animid
+end
+
+animid = anim2track(animid)
+
+local animation = Instance.new("Animation")
+animation.AnimationId = animid
+
+local function playAnim(character)
+    local Hum = character:FindFirstChildWhichIsA("Humanoid")
+    if not Hum then return end
+
+    for _, track in next, Hum:GetPlayingAnimationTracks() do
+        track:Stop()
+    end
+
+    local anim = Hum:LoadAnimation(animation)
+    anim.Priority = Enum.AnimationPriority.Action4
+    anim:Play()
+    anim:AdjustSpeed(speed)
+
+    anim.Stopped:Connect(function()
+        playAnim(character)
+    end)
+end
+
+Player.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid")
+    playAnim(character)
+end)
+
+if Player.Character then
+    playAnim(Player.Character)
+end
+
 -- ══════════════════════════════════════════
 -- No Bounds
 -- ══════════════════════════════════════════
@@ -1071,7 +1123,7 @@ makeSlider(mR,"Fly Speed",6,0,1000,50,"FlySpeed",nil)
 local vL, vR = createTab("Visuals", 3)
 makeHeader(vL,"Players",1)
 makeToggle(vL,"ESP",          "ESP",         2, nil,               nil)
-makeToggle(vL,"Third Person", "ThirdPerson", 3, enableThirdPerson, disableThirdPerson)
+makeToggle(vL,"Tornado", "Tornado", 3, enableTornado, disableTornado)
 
 local wL, wR = createTab("World", 4)
 makeHeader(wL,"Protection",1)
