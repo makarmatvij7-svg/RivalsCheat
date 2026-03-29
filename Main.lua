@@ -14,7 +14,7 @@ local camera = workspace.CurrentCamera
 
 local state = {
     NoRecoil=false, NoSpread=false, AutoDrop=false, ESP=false,
-    ThirdPerson=false, AntiKatana=false, NoBounds=false,
+    Tornado=false, AntiKatana=false, NoBounds=false,
     JumpBug=false, AutoStrafe=false, RapidFire=false,
     AutoWeapon=false, InstantScope=false, AlwaysBackstab=false,
     RemoveKillers=false, NoFireDamage=false, AntiFreeze=false,
@@ -271,23 +271,6 @@ end
 -- ══════════════════════════════════════════
 -- Anti Katana
 -- ══════════════════════════════════════════
-
-local antiKatanaConn, katanaCached = nil, {}
-
-local function enableAntiKatana()
-    katanaCached = gcCacheOnce({"ReflectBullets","CanReflect","IsBlocking","KatanaBlocking","KatanaActive","ParryActive","BulletReflect","Deflect","IsParrying","KatanaReflect","ReflectDamage"})
-    for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key]=false end) end
-    antiKatanaConn = RunService.Heartbeat:Connect(function()
-        if not state.AntiKatana then return end
-        for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key]=false end) end
-    end)
-end
-
-local function disableAntiKatana()
-    if antiKatanaConn then antiKatanaConn:Disconnect() antiKatanaConn=nil end
-    for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key] = e.original end) end
-    katanaCached={}
-end
 
 -- ══════════════════════════════════════════
 -- No Bounds
