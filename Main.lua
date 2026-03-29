@@ -1963,5 +1963,5 @@ task.spawn(function()
         end)
     end
 
-    print("[Skin Changer] Loaded —", isMobile and "tap the 👗 button to open." or "press K to open.")
+    print("[Skin Changer] Loaded —", isMobile and "tap the Skinchanger button to open." or "press K to open.")
 end)
