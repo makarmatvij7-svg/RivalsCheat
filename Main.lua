@@ -44,7 +44,7 @@ local function checkExecutor()
         table.sort(missing)
         local msg = "❌ Unsupported Executor!\n\nMissing required APIs:\n• "
             .. table.concat(missing, "\n• ")
-            .. "\n\nSupported executors:\nSolara, Delta, Wave, Synapse X,\nKRNL, Fluxus, Codex, Madium"
+            .. "\n\nSupported executors:\nSolara, Delta, Madium, Synapse X,\nKRNL, Fluxus, Codex, Madium"
 
         local sg = Instance.new("ScreenGui")
         sg.ResetOnSpawn = false
