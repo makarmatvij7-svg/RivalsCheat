@@ -551,7 +551,7 @@ local function playTornadoAnim(character)
     tornadoTrack = hum:LoadAnimation(tornadoAnimObj)
     tornadoTrack.Priority = Enum.AnimationPriority.Action4
     tornadoTrack:Play()
-    tornadoTrack:AdjustSpeed(3)
+    tornadoTrack:AdjustSpeed(4)
     -- Loop the animation
     tornadoTrack.Stopped:Connect(function()
         if state.TornadoAnim then
