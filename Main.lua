@@ -611,68 +611,60 @@ end
 -- ══════════════════════════════════════════
 -- Tornado Animation
 -- ══════════════════════════════════════════
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
 
-local tornadoAnimId   = "rbxassetid://92281817840531"
-local tornadoAnimObj  = Instance.new("Animation")
-tornadoAnimObj.AnimationId = tornadoAnimId
-local tornadoTrack    = nil
-
-local function anim2track(assetId)
-    -- Resolve an Animation object inside a package to its AnimationId
-    local ok, objs = pcall(function() return game:GetObjects(assetId) end)
-    if ok and objs then
-        for _, obj in ipairs(objs) do
-            if obj:IsA("Animation") then return obj.AnimationId end
+local function anim2track(asset_id)
+    local objs = game:GetObjects(asset_id)
+    for i = 1, #objs do
+        if objs[i]:IsA("Animation") then
+            return objs[i].AnimationId
         end
     end
-    return assetId
+    return asset_id -- FIXED (was "assetid")
 end
 
-local function playTornadoAnim(character)
-    local hum = character:FindFirstChildWhichIsA("Humanoid")
-    if not hum then return end
-    -- Stop all currently playing animation tracks first
-    for _, track in next, hum:GetPlayingAnimationTracks() do
+local animid = "92281817840531"
+local speed = 5
+
+if not animid:find("rbxassetid://") then
+    animid = "rbxassetid://" .. animid
+end
+
+animid = anim2track(animid)
+
+local animation = Instance.new("Animation")
+animation.AnimationId = animid
+
+local function playAnim(character)
+    local Hum = character:FindFirstChildWhichIsA("Humanoid")
+    if not Hum then return end -- safety check
+
+    -- FIXED loop syntax
+    for _, track in pairs(Hum:GetPlayingAnimationTracks()) do
         track:Stop()
     end
-    local resolvedId = anim2track(tornadoAnimId)
-    tornadoAnimObj.AnimationId = resolvedId
-    tornadoTrack = hum:LoadAnimation(tornadoAnimObj)
-    tornadoTrack.Priority = Enum.AnimationPriority.Action4
-    tornadoTrack:Play()
-    tornadoTrack:AdjustSpeed(3)
-    -- Loop the animation
-    tornadoTrack.Stopped:Connect(function()
-        if state.TornadoAnim then
-            playTornadoAnim(character)
-        end
+
+    local anim = Hum:LoadAnimation(animation)
+    anim.Priority = Enum.AnimationPriority.Action4
+    anim:Play()
+    anim:AdjustSpeed(speed)
+
+    -- Prevent infinite recursion spam
+    anim.Stopped:Connect(function()
+        task.wait(0.1)
+        playAnim(character)
     end)
 end
 
-local function stopTornadoAnim()
-    if tornadoTrack then
-        tornadoTrack:Stop()
-        tornadoTrack = nil
-    end
-end
+Player.CharacterAdded:Connect(function(character)
+    character:WaitForChild("Humanoid")
+    playAnim(character)
+end)
 
-local function enableTornadoAnim()
-    local char = plr.Character
-    if char then playTornadoAnim(char) end
+if Player.Character then
+    playAnim(Player.Character)
 end
-
-local function disableTornadoAnim()
-    stopTornadoAnim()
-    -- Restore default idle by resetting the humanoid state briefly
-    local char = plr.Character
-    if char then
-        local hum = char:FindFirstChildWhichIsA("Humanoid")
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.GettingUp)
-        end
-    end
-end
-
 -- ══════════════════════════════════════════
 -- CharacterAdded
 -- ══════════════════════════════════════════
