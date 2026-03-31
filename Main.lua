@@ -672,6 +672,7 @@ local function disableTornadoAnim()
         end
     end
 end
+
 -- ══════════════════════════════════════════
 -- CharacterAdded
 -- ══════════════════════════════════════════
