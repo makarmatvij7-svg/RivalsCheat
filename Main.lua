@@ -44,7 +44,7 @@ local function checkExecutor()
         table.sort(missing)
         local msg = "❌ Unsupported Executor!\n\nMissing required APIs:\n• "
             .. table.concat(missing, "\n• ")
-            .. "\n\nSupported executors:\nSolara, Delta, Wave, Synapse X,\nKRNL, Fluxus, Codex, Madium"
+            .. "\n\nSupported executors:\nSolara, Delta, Wave, Synapse X,\nKRNL, Velocity, Yub-x, Madium"
 
         local sg = Instance.new("ScreenGui")
         sg.ResetOnSpawn = false
@@ -75,7 +75,7 @@ local function checkExecutor()
         task.wait(4)
         game:GetService("Players").LocalPlayer:Kick(
             "Unsupported executor. Missing: " .. table.concat(missing, ", ")
-            .. " — Use Solara, Delta, Wave, Synapse X, KRNL, Velocity, Yub-x, or Madium."
+            .. " — Use Solara, Delta, Wave, Synapse X, KRNL, Fluxus, Codex, or Madium."
         )
         return false
     end
@@ -180,7 +180,7 @@ do
     titleLbl.Size = UDim2.new(1, -20, 1, 0)
     titleLbl.Position = UDim2.new(0, 18, 0, 0)
     titleLbl.BackgroundTransparency = 1
-    titleLbl.Text = "◈ CYBER CHEAT  •  Key System"
+    titleLbl.Text = "◈ Cyber Dragon  •  Key System"
     titleLbl.TextColor3 = KC.neon
     titleLbl.TextSize = 12
     titleLbl.Font = Enum.Font.GothamBold
@@ -203,7 +203,7 @@ do
     headLbl.Size = UDim2.new(1, -40, 0, 22)
     headLbl.Position = UDim2.new(0, 20, 0, 92)
     headLbl.BackgroundTransparency = 1
-    headLbl.Text = "Enter your key to unlock CyberDragon"
+    headLbl.Text = "Enter your key to unlock Cyber Dragon"
     headLbl.TextColor3 = KC.text
     headLbl.TextSize = 13
     headLbl.Font = Enum.Font.GothamBold
@@ -374,7 +374,7 @@ do
 
         if entered == VALID_KEY then
             -- ✅ Correct
-            setStatus("✅  Key accepted! Loading CyberDragon...", KC.green)
+            setStatus("✅  Key accepted! Loading Cyber Dragon...", KC.green)
             TweenService:Create(verifyBtn, TweenInfo.new(0.15), {BackgroundColor3=Color3.fromRGB(0,60,35)}):Play()
             verifyBtn.Text = "✓  Accepted!"
             verifyBtn.TextColor3 = KC.green
@@ -1209,7 +1209,7 @@ Instance.new("UICorner",titleAccent).CornerRadius=UDim.new(1,0)
 local titleLbl = Instance.new("TextLabel")
 titleLbl.Size=UDim2.new(1,-60,1,0) titleLbl.Position=UDim2.new(0,14,0,0)
 titleLbl.BackgroundTransparency=1
-titleLbl.Text = isMobileMain and "◈ CYBER" or "◈ CYBER CHEAT"
+titleLbl.Text = isMobileMain and "◈ Cyber Dragon" or "◈ Cyber Dragon"
 titleLbl.TextColor3=C.neon
 titleLbl.TextSize = isMobileMain and 10 or 12
 titleLbl.Font=Enum.Font.GothamBold
@@ -2070,7 +2070,8 @@ task.spawn(function()
 
     local SC_Gui = Instance.new("ScreenGui", plr.PlayerGui)
     SC_Gui.ResetOnSpawn = false
-    SC_Gui.Name = "AnihaSkinChanger"
+    SC_Gui.Name = "CyberDragonSkinChanger"
+    SC_Gui.Parent = plr.PlayerGui
 
     -- Reuse the mobile detection from the main UI
     local isMobile = isMobileMain
@@ -2120,7 +2121,7 @@ task.spawn(function()
     local SC_Title = Instance.new("TextLabel", SC_Main)
     SC_Title.Size = UDim2.new(1,0,0, isMobile and 40 or 50)
     SC_Title.BackgroundColor3 = Color3.fromRGB(30,30,35)
-    SC_Title.Text = isMobile and "◈ Skin Changer" or "◈ Skin Changer  •  [ K ] Toggle"
+    SC_Title.Text = isMobile and "◈ Cyber Dragon Skin Changer" or "◈ Cyber Dragon Skin Changer  •  [ K ] Toggle"
     SC_Title.TextColor3 = Color3.fromRGB(0,255,200)
     SC_Title.Font = Enum.Font.GothamBlack
     SC_Title.TextSize = isMobile and 16 or 20
@@ -2508,5 +2509,5 @@ task.spawn(function()
         end)
     end
 
-    print("[Skin Changer] Loaded —", isMobile and "tap the 👗 button to open." or "press K to open.")
+    print("[Cyber Dragon Skin Changer] Loaded —", isMobile and "tap the 👗 button to open." or "press K to open.")
 end)
