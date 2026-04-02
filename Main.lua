@@ -104,7 +104,7 @@ local camera = workspace.CurrentCamera
 -- ── Configuration ────────────────────────
 -- Set VALID_KEY to your chosen key string.
 -- Set KEY_URL to wherever players get their key (Linkvertise, pastebin, etc.)
-local VALID_KEY = "CYBER-2026"
+local VALID_KEY = "RX7A-91KQ-ZL2P-8XWM"
 local KEY_URL   = "https://link-target.net/3311972/9bTwBCLEq41P"   -- replace with your actual URL
 
 -- ── Colours (matches main cheat UI exactly) ──
