@@ -1,56 +1,38 @@
 -- ══════════════════════════════════════════
 -- EXECUTOR SUPPORT CHECK
--- Required APIs → missing = kick with message
--- Optional APIs → missing = that feature disabled, no kick
 -- ══════════════════════════════════════════
 
 local function checkExecutor()
-    -- ── REQUIRED: script cannot function at all without these ──
     local required = {
-        ["getgc (GC scanner — needed for No Recoil, Rapid Fire, Anti Katana etc.)"] = getgc,
-        ["getgenv (environment access — needed for Aimbot)"]                         = getgenv,
-        ["loadstring (needed to load Silent Aim)"]                                   = loadstring,
-        ["Drawing (needed for ESP)"]                                                 = Drawing,
+        ["getgc"] = getgc,
+        ["getgenv"] = getgenv,
+        ["loadstring"] = loadstring,
+        ["Drawing"] = Drawing,
     }
-
-    -- ── OPTIONAL: missing = feature silently disabled, no kick ──
     local optional = {
-        firetouchinterest = firetouchinterest,  -- Auto Drop Collector
-        writefile         = writefile,           -- Config save
-        readfile          = readfile,            -- Config load
-        isfile            = isfile,              -- Config check
+        firetouchinterest = firetouchinterest,
+        writefile = writefile,
+        readfile = readfile,
+        isfile = isfile,
     }
-
-    -- Disable optional features that are missing so they don't error
-    if not optional.firetouchinterest then
-        firetouchinterest = function() end   -- no-op so AutoDrop just does nothing
-    end
+    if not optional.firetouchinterest then firetouchinterest = function() end end
     if not optional.writefile or not optional.readfile or not optional.isfile then
-        -- Stub out file functions so Save/Load buttons show a friendly error instead of crashing
         writefile = writefile or function() error("writefile not supported") end
-        readfile  = readfile  or function() error("readfile not supported") end
-        isfile    = isfile    or function() return false end
+        readfile = readfile or function() error("readfile not supported") end
+        isfile = isfile or function() return false end
     end
-
-    -- Check required APIs
     local missing = {}
     for name, api in pairs(required) do
-        if not api then
-            table.insert(missing, name)
-        end
+        if not api then table.insert(missing, name) end
     end
-
     if #missing > 0 then
         table.sort(missing)
-        local msg = "❌ Unsupported Executor!\n\nMissing required APIs:\n• "
-            .. table.concat(missing, "\n• ")
-            .. "\n\nSupported executors:\nSolara, Delta, Wave, Synapse X,\nKRNL, Velocity, Yub-x, Madium"
-
+        local msg = "❌ Unsupported Executor!\n\nMissing required APIs:\n• " .. table.concat(missing, "\n• ") ..
+            "\n\nSupported executors:\nSolara, Delta, Wave, Synapse X,\nKRNL, Velocity, Yub-x, Madium"
         local sg = Instance.new("ScreenGui")
         sg.ResetOnSpawn = false
         sg.Name = "UnsupportedExecutor"
         sg.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
-
         local frame = Instance.new("Frame", sg)
         frame.Size = UDim2.new(0,500,0,300)
         frame.Position = UDim2.new(0.5,-250,0.5,-150)
@@ -59,7 +41,6 @@ local function checkExecutor()
         Instance.new("UICorner",frame).CornerRadius = UDim.new(0,10)
         local stroke = Instance.new("UIStroke",frame)
         stroke.Color = Color3.fromRGB(255,60,60) stroke.Thickness = 2
-
         local lbl = Instance.new("TextLabel",frame)
         lbl.Size = UDim2.new(1,-20,1,-20)
         lbl.Position = UDim2.new(0,10,0,10)
@@ -71,15 +52,11 @@ local function checkExecutor()
         lbl.TextXAlignment = Enum.TextXAlignment.Left
         lbl.TextYAlignment = Enum.TextYAlignment.Top
         lbl.TextWrapped = true
-
         task.wait(4)
-        game:GetService("Players").LocalPlayer:Kick(
-            "Unsupported executor. Missing: " .. table.concat(missing, ", ")
-            .. " — Use Solara, Delta, Wave, Synapse X, KRNL, Fluxus, Codex, or Madium."
-        )
+        game:GetService("Players").LocalPlayer:Kick("Unsupported executor. Missing: " .. table.concat(missing, ", ") ..
+            " — Use Solara, Delta, Wave, Synapse X, KRNL, Fluxus, Codex, or Madium.")
         return false
     end
-
     return true
 end
 
@@ -101,13 +78,9 @@ local camera = workspace.CurrentCamera
 -- KEY SYSTEM
 -- ══════════════════════════════════════════
 
--- ── Configuration ────────────────────────
--- Set VALID_KEY to your chosen key string.
--- Set KEY_URL to wherever players get their key (Linkvertise, pastebin, etc.)
 local VALID_KEY = "RX7A-91KQ-ZL2P-8XWM"
-local KEY_URL   = "https://loot-link.com/s?3YVOShw2"   -- replace with your actual URL
+local KEY_URL   = "https://loot-link.com/s?3YVOShw2"
 
--- ── Colours (matches main cheat UI exactly) ──
 local KC = {
     bg     = Color3.fromRGB(8,   8,   12),
     bg2    = Color3.fromRGB(14,  14,  20),
@@ -131,7 +104,6 @@ do
     kGui.DisplayOrder = 999
     kGui.Parent = plr:WaitForChild("PlayerGui")
 
-    -- ── Blur/dimmed backdrop ──────────────────
     local backdrop = Instance.new("Frame", kGui)
     backdrop.Size = UDim2.new(1, 0, 1, 0)
     backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -139,21 +111,19 @@ do
     backdrop.BorderSizePixel = 0
     backdrop.ZIndex = 1
 
-    -- ── Main window ───────────────────────────
     local win = Instance.new("Frame", kGui)
     win.Size = UDim2.new(0, 440, 0, 320)
     win.Position = UDim2.new(0.5, -220, 0.5, -160)
     win.BackgroundColor3 = KC.bg
     win.BorderSizePixel = 0
     win.ZIndex = 2
-    win.BackgroundTransparency = 1  -- start invisible, tween in
+    win.BackgroundTransparency = 1
     Instance.new("UICorner", win).CornerRadius = UDim.new(0, 8)
     local winStroke = Instance.new("UIStroke", win)
     winStroke.Color = KC.neon
     winStroke.Thickness = 1.5
     winStroke.Transparency = 1
 
-    -- ── Title bar ─────────────────────────────
     local titleBar = Instance.new("Frame", win)
     titleBar.Size = UDim2.new(1, 0, 0, 38)
     titleBar.BackgroundColor3 = KC.bg2
@@ -167,7 +137,6 @@ do
     tbFix.BorderSizePixel = 0
     tbFix.ZIndex = 3
 
-    -- Accent bar left of title
     local accent = Instance.new("Frame", titleBar)
     accent.Size = UDim2.new(0, 3, 1, -10)
     accent.Position = UDim2.new(0, 8, 0, 5)
@@ -187,8 +156,6 @@ do
     titleLbl.TextXAlignment = Enum.TextXAlignment.Left
     titleLbl.ZIndex = 4
 
-    -- ── Body ──────────────────────────────────
-    -- Dragon icon / header
     local iconLbl = Instance.new("TextLabel", win)
     iconLbl.Size = UDim2.new(1, 0, 0, 40)
     iconLbl.Position = UDim2.new(0, 0, 0, 48)
@@ -221,7 +188,6 @@ do
     subLbl.TextXAlignment = Enum.TextXAlignment.Center
     subLbl.ZIndex = 3
 
-    -- ── Key input box ─────────────────────────
     local inputFrame = Instance.new("Frame", win)
     inputFrame.Size = UDim2.new(1, -40, 0, 36)
     inputFrame.Position = UDim2.new(0, 20, 0, 146)
@@ -233,7 +199,6 @@ do
     inputStroke.Color = KC.border
     inputStroke.Thickness = 1
 
-    -- Key icon inside box
     local keyIcon = Instance.new("TextLabel", inputFrame)
     keyIcon.Size = UDim2.new(0, 28, 1, 0)
     keyIcon.BackgroundTransparency = 1
@@ -257,7 +222,6 @@ do
     keyInput.ClearTextOnFocus = false
     keyInput.ZIndex = 4
 
-    -- Focus glow on input
     keyInput.Focused:Connect(function()
         TweenService:Create(inputStroke, TweenInfo.new(0.15), {Color=KC.neon, Transparency=0}):Play()
     end)
@@ -265,7 +229,6 @@ do
         TweenService:Create(inputStroke, TweenInfo.new(0.15), {Color=KC.border, Transparency=0}):Play()
     end)
 
-    -- ── Status label ──────────────────────────
     local statusLbl = Instance.new("TextLabel", win)
     statusLbl.Size = UDim2.new(1, -40, 0, 18)
     statusLbl.Position = UDim2.new(0, 20, 0, 191)
@@ -282,14 +245,12 @@ do
         statusLbl.TextColor3 = col or KC.dim
     end
 
-    -- ── Buttons row ───────────────────────────
     local btnRow = Instance.new("Frame", win)
     btnRow.Size = UDim2.new(1, -40, 0, 36)
     btnRow.Position = UDim2.new(0, 20, 0, 218)
     btnRow.BackgroundTransparency = 1
     btnRow.ZIndex = 3
 
-    -- Helper to make a styled button
     local function makeKeyBtn(parent, text, xScale, wScale, bg, hoverBg)
         local btn = Instance.new("TextButton", parent)
         btn.Size = UDim2.new(wScale, -4, 1, 0)
@@ -322,17 +283,14 @@ do
         return btn, bs
     end
 
-    -- "Get Key" button (left, 45%)
     local getKeyBtn = makeKeyBtn(btnRow, "🔗  Get Key", 0, 0.45,
         Color3.fromRGB(14,14,20), Color3.fromRGB(0,40,32))
 
-    -- "Verify" button (right, 55%)
     local verifyBtn, verifyStroke = makeKeyBtn(btnRow, "✓  Verify Key", 0.45, 0.55,
         Color3.fromRGB(0,30,22), Color3.fromRGB(0,55,42))
     verifyStroke.Transparency = 0
     verifyStroke.Color = KC.neon
 
-    -- ── Divider line ──────────────────────────
     local divLine = Instance.new("Frame", win)
     divLine.Size = UDim2.new(1, -40, 0, 1)
     divLine.Position = UDim2.new(0, 20, 0, 266)
@@ -340,7 +298,6 @@ do
     divLine.BorderSizePixel = 0
     divLine.ZIndex = 3
 
-    -- ── Footer ────────────────────────────────
     local footerLbl = Instance.new("TextLabel", win)
     footerLbl.Size = UDim2.new(1, -40, 0, 28)
     footerLbl.Position = UDim2.new(0, 20, 0, 272)
@@ -352,9 +309,7 @@ do
     footerLbl.TextXAlignment = Enum.TextXAlignment.Center
     footerLbl.ZIndex = 3
 
-    -- ── Button logic ──────────────────────────
     getKeyBtn.MouseButton1Click:Connect(function()
-        -- Copy URL to clipboard and show feedback
         pcall(function() setclipboard(KEY_URL) end)
         setStatus("🔗  Key URL copied to clipboard!", KC.neon2)
         getKeyBtn.Text = "✓  Copied!"
@@ -365,7 +320,7 @@ do
     end)
 
     verifyBtn.MouseButton1Click:Connect(function()
-        local entered = keyInput.Text:gsub("%s+","")  -- strip whitespace
+        local entered = keyInput.Text:gsub("%s+","")
         if entered == "" then
             setStatus("⚠  Please enter a key first.", KC.dim)
             TweenService:Create(inputStroke, TweenInfo.new(0.1), {Color=KC.dim}):Play()
@@ -373,7 +328,6 @@ do
         end
 
         if entered == VALID_KEY then
-            -- ✅ Correct
             setStatus("✅  Key accepted! Loading Cyber Dragon...", KC.green)
             TweenService:Create(verifyBtn, TweenInfo.new(0.15), {BackgroundColor3=Color3.fromRGB(0,60,35)}):Play()
             verifyBtn.Text = "✓  Accepted!"
@@ -382,7 +336,6 @@ do
             TweenService:Create(winStroke, TweenInfo.new(0.3), {Color=KC.green}):Play()
 
             task.delay(1.2, function()
-                -- Fade out the key window
                 TweenService:Create(win, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {BackgroundTransparency=1}):Play()
                 TweenService:Create(winStroke, TweenInfo.new(0.4), {Transparency=1}):Play()
                 TweenService:Create(backdrop, TweenInfo.new(0.4), {BackgroundTransparency=1}):Play()
@@ -392,10 +345,8 @@ do
                 end)
             end)
         else
-            -- ❌ Wrong key
             setStatus("❌  Invalid key. Try again.", KC.red)
             TweenService:Create(inputStroke, TweenInfo.new(0.1), {Color=KC.red}):Play()
-            -- Shake the input box
             local origPos = inputFrame.Position
             local shakeAmts = {6, -5, 4, -3, 2, -1, 0}
             task.spawn(function()
@@ -410,12 +361,10 @@ do
         end
     end)
 
-    -- Also verify on Enter key press
     keyInput.FocusLost:Connect(function(enterPressed)
         if enterPressed then verifyBtn.MouseButton1Click:Fire() end
     end)
 
-    -- ── Entrance animation ────────────────────
     task.spawn(function()
         task.wait(0.05)
         win.Position = UDim2.new(0.5, -220, 0.5, -180)
@@ -426,7 +375,6 @@ do
         TweenService:Create(winStroke, TweenInfo.new(0.35), {Transparency=0}):Play()
     end)
 
-    -- ── Block execution until key is verified ─
     repeat task.wait(0.05) until keyVerified
 end
 
@@ -441,14 +389,14 @@ local state = {
     AutoWeapon=false, InstantScope=false, AlwaysBackstab=false,
     RemoveKillers=false, NoFireDamage=false, AntiFreeze=false,
     Fly=false, Noclip=false, AntiAim=false, AutoFarm=false,
-    TornadoAnim=false,
+    TornadoAnim=false, HitNotif=true,
 }
 
 local settings = { WalkSpeed=16, JumpPower=50, StrafeIntensity=50, FlySpeed=50 }
 local farmPosition = "Behind"
 
 -- ══════════════════════════════════════════
--- GC Cache
+-- GC Cache (type‑safe)
 -- ══════════════════════════════════════════
 
 local cachedTables = {}
@@ -456,9 +404,15 @@ local cachedTables = {}
 local function findAndCache(attribute)
     if cachedTables[attribute] then return end
     cachedTables[attribute] = {}
-    for _, gcVal in pairs(getgc(true)) do
+    local success, gc = pcall(getgc, true)
+    if not success then return end
+    for _, gcVal in pairs(gc) do
         if type(gcVal) == "table" and rawget(gcVal, attribute) ~= nil then
-            table.insert(cachedTables[attribute], { tbl=gcVal, original=gcVal[attribute] })
+            local original = gcVal[attribute]
+            local typ = type(original)
+            if typ == "number" or typ == "boolean" then
+                table.insert(cachedTables[attribute], { tbl=gcVal, original=original, typ=typ })
+            end
         end
     end
 end
@@ -467,7 +421,7 @@ local function applyAttribute(attribute, value)
     findAndCache(attribute)
     if type(cachedTables[attribute]) ~= "table" then return end
     for _, entry in pairs(cachedTables[attribute]) do
-        if type(entry) == "table" and entry.tbl then
+        if entry.tbl and (entry.typ == "number" or entry.typ == "boolean") then
             pcall(function() entry.tbl[attribute] = value end)
         end
     end
@@ -475,9 +429,8 @@ end
 
 local function restoreAttribute(attribute)
     if not cachedTables[attribute] then return end
-    if type(cachedTables[attribute]) ~= "table" then cachedTables[attribute]=nil return end
     for _, entry in pairs(cachedTables[attribute]) do
-        if type(entry) == "table" and entry.tbl then
+        if entry.tbl and entry.typ then
             pcall(function() entry.tbl[attribute] = entry.original end)
         end
     end
@@ -486,16 +439,38 @@ end
 
 local function gcCacheOnce(keys)
     local cached = {}
-    for _, gcVal in pairs(getgc(true)) do
+    local success, gc = pcall(getgc, true)
+    if not success then return cached end
+    for _, gcVal in pairs(gc) do
         if type(gcVal) == "table" then
             for _, key in pairs(keys) do
-                if rawget(gcVal, key) ~= nil then
-                    table.insert(cached, {tbl=gcVal, key=key, original=gcVal[key]})
+                local original = rawget(gcVal, key)
+                if original ~= nil then
+                    local typ = type(original)
+                    if typ == "number" or typ == "boolean" then
+                        table.insert(cached, {tbl=gcVal, key=key, original=original, typ=typ})
+                    end
                 end
             end
         end
     end
     return cached
+end
+
+local function modifyCached(cached, value)
+    for _, e in pairs(cached) do
+        if e.tbl and (e.typ == "number" or e.typ == "boolean") then
+            pcall(function() e.tbl[e.key] = value end)
+        end
+    end
+end
+
+local function restoreCached(cached)
+    for _, e in pairs(cached) do
+        if e.tbl and e.typ then
+            pcall(function() e.tbl[e.key] = e.original end)
+        end
+    end
 end
 
 -- ══════════════════════════════════════════
@@ -692,35 +667,35 @@ local function disableThirdPerson()
 end
 
 -- ══════════════════════════════════════════
--- Anti Katana
+-- Anti Katana (type‑safe)
 -- ══════════════════════════════════════════
 
 local antiKatanaConn, katanaCached = nil, {}
 
 local function enableAntiKatana()
     katanaCached = gcCacheOnce({"ReflectBullets","CanReflect","IsBlocking","KatanaBlocking","KatanaActive","ParryActive","BulletReflect","Deflect","IsParrying","KatanaReflect","ReflectDamage"})
-    for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key]=false end) end
+    modifyCached(katanaCached, false)
     antiKatanaConn = RunService.Heartbeat:Connect(function()
         if not state.AntiKatana then return end
-        for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key]=false end) end
+        modifyCached(katanaCached, false)
     end)
 end
 
 local function disableAntiKatana()
     if antiKatanaConn then antiKatanaConn:Disconnect() antiKatanaConn=nil end
-    for _, e in pairs(katanaCached) do pcall(function() e.tbl[e.key] = e.original end) end
+    restoreCached(katanaCached)
     katanaCached={}
 end
 
 -- ══════════════════════════════════════════
--- No Bounds
+-- No Bounds (type‑safe)
 -- ══════════════════════════════════════════
 
 local noBoundsConn, noBoundsCached, lastSafePos = nil, {}, nil
 
 local function enableNoBounds()
     noBoundsCached = gcCacheOnce({"OutOfBounds","IsOutOfBounds","OOB","outOfBounds","BoundsDead","VoidKill","InVoid","FellOff","KillOnFall","DeathFloor","KillFloor"})
-    for _, e in pairs(noBoundsCached) do pcall(function() e.tbl[e.key]=false end) end
+    modifyCached(noBoundsCached, false)
     local char = plr.Character
     if char then
         local hrp = char:FindFirstChild("HumanoidRootPart")
@@ -732,13 +707,13 @@ local function enableNoBounds()
         local hrp = char:FindFirstChild("HumanoidRootPart") if not hrp then return end
         if hrp.Position.Y > -10 then lastSafePos = hrp.CFrame end
         if hrp.Position.Y < -80 and lastSafePos then hrp.CFrame = lastSafePos end
-        for _, e in pairs(noBoundsCached) do pcall(function() e.tbl[e.key]=false end) end
+        modifyCached(noBoundsCached, false)
     end)
 end
 
 local function disableNoBounds()
     if noBoundsConn then noBoundsConn:Disconnect() noBoundsConn=nil end
-    for _, e in pairs(noBoundsCached) do pcall(function() e.tbl[e.key] = e.original end) end
+    restoreCached(noBoundsCached)
     noBoundsCached={} lastSafePos=nil
 end
 
@@ -796,77 +771,83 @@ local function disableAutoStrafe()
 end
 
 -- ══════════════════════════════════════════
--- Rapid Fire
+-- Rapid Fire (type‑safe)
 -- ══════════════════════════════════════════
 
 local rapidFireCached = {}
 
 local function enableRapidFire()
     rapidFireCached = gcCacheOnce({"ShootCooldown","FireRate","Cooldown","cooldown","FireDelay"})
-    for _, e in pairs(rapidFireCached) do pcall(function() e.tbl[e.key]=0 end) end
+    modifyCached(rapidFireCached, 0)
 end
 
 local function disableRapidFire()
-    for _, e in pairs(rapidFireCached) do pcall(function() e.tbl[e.key]=e.original end) end
+    restoreCached(rapidFireCached)
     rapidFireCached={}
 end
 
 -- ══════════════════════════════════════════
--- Auto Weapon
+-- Auto Weapon (type‑safe)
 -- ══════════════════════════════════════════
 
 local autoWeaponCached = {}
 
 local function enableAutoWeapon()
     autoWeaponCached = gcCacheOnce({"IsAutomatic","AutoFire","Automatic","isAutomatic","FullAuto"})
-    for _, e in pairs(autoWeaponCached) do pcall(function() e.tbl[e.key]=true end) end
+    modifyCached(autoWeaponCached, true)
 end
 
 local function disableAutoWeapon()
-    for _, e in pairs(autoWeaponCached) do pcall(function() e.tbl[e.key]=false end) end
+    restoreCached(autoWeaponCached)
     autoWeaponCached={}
 end
 
 -- ══════════════════════════════════════════
--- Instant Scope
+-- Instant Scope (type‑safe)
 -- ══════════════════════════════════════════
 
 local instantScopeCached = {}
 
 local function enableInstantScope()
     instantScopeCached = gcCacheOnce({"ScopeTime","AimTime","AimDelay","ScopeDelay","ZoomTime","ADSTime"})
-    for _, e in pairs(instantScopeCached) do pcall(function() e.tbl[e.key]=0 end) end
+    modifyCached(instantScopeCached, 0)
 end
 
 local function disableInstantScope()
-    for _, e in pairs(instantScopeCached) do pcall(function() e.tbl[e.key]=e.original end) end
+    restoreCached(instantScopeCached)
     instantScopeCached={}
 end
 
 -- ══════════════════════════════════════════
--- Always Backstab
+-- Always Backstab (type‑safe)
 -- ══════════════════════════════════════════
 
 local backstabCached, backstabConn = {}, nil
 
 local function enableAlwaysBackstab()
     backstabCached = gcCacheOnce({"IsBackstab","BackstabAngle","BackstabMultiplier","CanBackstab","BackstabEnabled"})
-    for _, e in pairs(backstabCached) do pcall(function()
-        if type(e.tbl[e.key])=="boolean" then e.tbl[e.key]=true
-        elseif type(e.tbl[e.key])=="number" then e.tbl[e.key]=360 end
-    end) end
+    for _, e in pairs(backstabCached) do
+        if e.typ == "boolean" then
+            pcall(function() e.tbl[e.key] = true end)
+        elseif e.typ == "number" then
+            pcall(function() e.tbl[e.key] = 360 end)
+        end
+    end
     backstabConn = RunService.Heartbeat:Connect(function()
         if not state.AlwaysBackstab then return end
-        for _, e in pairs(backstabCached) do pcall(function()
-            if type(e.tbl[e.key])=="boolean" then e.tbl[e.key]=true
-            elseif type(e.tbl[e.key])=="number" then e.tbl[e.key]=360 end
-        end) end
+        for _, e in pairs(backstabCached) do
+            if e.typ == "boolean" then
+                pcall(function() e.tbl[e.key] = true end)
+            elseif e.typ == "number" then
+                pcall(function() e.tbl[e.key] = 360 end)
+            end
+        end
     end)
 end
 
 local function disableAlwaysBackstab()
     if backstabConn then backstabConn:Disconnect() backstabConn=nil end
-    for _, e in pairs(backstabCached) do pcall(function() e.tbl[e.key] = e.original end) end
+    restoreCached(backstabCached)
     backstabCached={}
 end
 
@@ -896,14 +877,14 @@ local function disableRemoveKillers()
 end
 
 -- ══════════════════════════════════════════
--- No Fire Damage
+-- No Fire Damage (type‑safe)
 -- ══════════════════════════════════════════
 
 local fireDamageCached, fireDamageConn = {}, nil
 
 local function enableNoFireDamage()
     fireDamageCached = gcCacheOnce({"FireDamage","BurnDamage","FlameDamage","HeatDamage","IgniteDamage"})
-    for _, e in pairs(fireDamageCached) do pcall(function() e.tbl[e.key]=0 end) end
+    modifyCached(fireDamageCached, 0)
     fireDamageConn = RunService.Heartbeat:Connect(function()
         if not state.NoFireDamage then return end
         local char = plr.Character if not char then return end
@@ -915,7 +896,7 @@ end
 
 local function disableNoFireDamage()
     if fireDamageConn then fireDamageConn:Disconnect() fireDamageConn=nil end
-    for _, e in pairs(fireDamageCached) do pcall(function() e.tbl[e.key] = e.original end) end
+    restoreCached(fireDamageCached)
     fireDamageCached={}
 end
 
@@ -951,7 +932,6 @@ tornadoAnimObj.AnimationId = tornadoAnimId
 local tornadoTrack    = nil
 
 local function anim2track(assetId)
-    -- Resolve an Animation object inside a package to its AnimationId
     local ok, objs = pcall(function() return game:GetObjects(assetId) end)
     if ok and objs then
         for _, obj in ipairs(objs) do
@@ -964,7 +944,6 @@ end
 local function playTornadoAnim(character)
     local hum = character:FindFirstChildWhichIsA("Humanoid")
     if not hum then return end
-    -- Stop all currently playing animation tracks first
     for _, track in next, hum:GetPlayingAnimationTracks() do
         track:Stop()
     end
@@ -974,7 +953,6 @@ local function playTornadoAnim(character)
     tornadoTrack.Priority = Enum.AnimationPriority.Action4
     tornadoTrack:Play()
     tornadoTrack:AdjustSpeed(3)
-    -- Loop the animation
     tornadoTrack.Stopped:Connect(function()
         if state.TornadoAnim then
             playTornadoAnim(character)
@@ -996,7 +974,6 @@ end
 
 local function disableTornadoAnim()
     stopTornadoAnim()
-    -- Restore default idle by resetting the humanoid state briefly
     local char = plr.Character
     if char then
         local hum = char:FindFirstChildWhichIsA("Humanoid")
@@ -1025,6 +1002,11 @@ plr.CharacterAdded:Connect(function()
             end
         end
     end
+    local hum = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid")
+    if hum then
+        hum.WalkSpeed = settings.WalkSpeed
+        hum.JumpPower = settings.JumpPower
+    end
 end)
 
 -- ══════════════════════════════════════════
@@ -1032,16 +1014,17 @@ end)
 -- ══════════════════════════════════════════
 
 local espObjects = {}
+local drawingSupported = pcall(function() return Drawing.new("Square") end)
 
 local function newDrawing(t, props)
+    if not drawingSupported then return nil end
     local obj = Drawing.new(t)
     for k,v in pairs(props) do obj[k]=v end
     return obj
 end
 
 local function createESP(player)
-    if espObjects[player] then return end
-    if not Drawing then return end
+    if espObjects[player] or not drawingSupported then return end
     espObjects[player] = {
         box      = newDrawing("Square",{Visible=false,Color=Color3.fromRGB(0,255,200),Thickness=1.5,Filled=false,Transparency=1}),
         boxFill  = newDrawing("Square",{Visible=false,Color=Color3.fromRGB(0,200,150),Thickness=1,Filled=true,Transparency=0.9}),
@@ -1083,6 +1066,7 @@ local function getCharacterBounds(char)
 end
 
 local function updateESP(player)
+    if not drawingSupported then return end
     local esp=espObjects[player] if not esp then return end
     local char=player.Character if not char then hideESP(player) return end
     local hrp=char:FindFirstChild("HumanoidRootPart")
@@ -1116,6 +1100,7 @@ Players.PlayerRemoving:Connect(removeESP)
 for _,p in pairs(Players:GetPlayers()) do onPlayerAdded(p) end
 
 RunService.RenderStepped:Connect(function()
+    if not drawingSupported then return end
     for _,p in pairs(Players:GetPlayers()) do
         if p~=plr then if state.ESP then updateESP(p) else hideESP(p) end end
     end
@@ -1135,8 +1120,166 @@ RunService.Heartbeat:Connect(function()
     local char=plr.Character if not char then return end
     local hrp=char:FindFirstChild("HumanoidRootPart") if not hrp then return end
     for obj in pairs(drops) do
-        if obj.Parent then firetouchinterest(hrp,obj,0) firetouchinterest(hrp,obj,1) end
+        if obj.Parent then
+            pcall(function() firetouchinterest(hrp,obj,0) end)
+            pcall(function() firetouchinterest(hrp,obj,1) end)
+        end
     end
+end)
+
+-- ══════════════════════════════════════════
+-- HIT NOTIFICATION (RELIABLE FIX)
+-- ══════════════════════════════════════════
+
+local hitNotifGui = Instance.new("ScreenGui")
+hitNotifGui.Name = "CyberDragonHitNotif"
+hitNotifGui.ResetOnSpawn = false
+hitNotifGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+hitNotifGui.DisplayOrder = 50
+hitNotifGui.Parent = plr:WaitForChild("PlayerGui")
+
+local NOTIF_LIMIT  = 5
+local NOTIF_LIFE   = 2.8
+local NOTIF_FADE   = 0.4
+local NOTIF_H      = 36
+local NOTIF_GAP    = 4
+local NOTIF_Y_TOP  = 60
+
+local notifQueue = {}
+
+local function showHitNotification(targetName, damage, bodyPart)
+    if not state.HitNotif then return end
+    if #notifQueue >= NOTIF_LIMIT then
+        local oldest = table.remove(notifQueue, 1)
+        if oldest and oldest.frame then oldest.frame:Destroy() end
+    end
+    for i, n in ipairs(notifQueue) do
+        local targetY = NOTIF_Y_TOP + (i - 1) * (NOTIF_H + NOTIF_GAP)
+        TweenService:Create(n.frame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+            Position = UDim2.new(0.5, -220, 0, targetY)
+        }):Play()
+    end
+    local yPos = NOTIF_Y_TOP + #notifQueue * (NOTIF_H + NOTIF_GAP)
+    local frame = Instance.new("Frame", hitNotifGui)
+    frame.Size = UDim2.new(0, 440, 0, NOTIF_H)
+    frame.Position = UDim2.new(0.5, -220, 0, yPos)
+    frame.BackgroundColor3 = Color3.fromRGB(5, 5, 40)
+    frame.BorderSizePixel = 0
+    frame.BackgroundTransparency = 0
+    frame.ZIndex = 10
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 4)
+    local underline = Instance.new("Frame", frame)
+    underline.Size = UDim2.new(1, 0, 0, 2)
+    underline.Position = UDim2.new(0, 0, 1, -2)
+    underline.BackgroundColor3 = Color3.fromRGB(60, 100, 255)
+    underline.BorderSizePixel = 0
+    underline.ZIndex = 11
+    local partText = bodyPart and (" in the " .. bodyPart) or ""
+    local msg = string.format("Hit %s for %d%s", targetName, math.floor(damage), partText)
+    local label = Instance.new("TextLabel", frame)
+    label.Size = UDim2.new(1, -16, 1, 0)
+    label.Position = UDim2.new(0, 8, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = msg
+    label.TextColor3 = Color3.fromRGB(230, 230, 255)
+    label.TextSize = 16
+    label.Font = Enum.Font.GothamBold
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextYAlignment = Enum.TextYAlignment.Center
+    label.ZIndex = 11
+    frame.Position = UDim2.new(0.5, -260, 0, yPos)
+    TweenService:Create(frame, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, -220, 0, yPos)
+    }):Play()
+    local entry = { frame = frame }
+    table.insert(notifQueue, entry)
+    task.delay(NOTIF_LIFE, function()
+        for i, n in ipairs(notifQueue) do
+            if n == entry then table.remove(notifQueue, i) break end
+        end
+        for i, n in ipairs(notifQueue) do
+            local targetY2 = NOTIF_Y_TOP + (i - 1) * (NOTIF_H + NOTIF_GAP)
+            TweenService:Create(n.frame, TweenInfo.new(0.15, Enum.EasingStyle.Quad), {
+                Position = UDim2.new(0.5, -220, 0, targetY2)
+            }):Play()
+        end
+        TweenService:Create(frame, TweenInfo.new(NOTIF_FADE, Enum.EasingStyle.Quad), {
+            BackgroundTransparency = 1
+        }):Play()
+        TweenService:Create(label, TweenInfo.new(NOTIF_FADE), {TextTransparency = 1}):Play()
+        TweenService:Create(underline, TweenInfo.new(NOTIF_FADE), {BackgroundTransparency = 1}):Play()
+        task.delay(NOTIF_FADE + 0.05, function()
+            if frame and frame.Parent then frame:Destroy() end
+        end)
+    end)
+end
+
+-- Track last health and last notification time per enemy
+local lastHealth = {}
+local lastNotifTime = {}
+
+-- Helper: check if the local player is aiming at a given character
+local function isAimingAtCharacter(char)
+    if not char then return false end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+    local camPos = camera.CFrame.Position
+    local look = camera.CFrame.LookVector
+    local toTarget = (hrp.Position - camPos).Unit
+    -- Angle threshold: about 5 degrees (cos ~0.996)
+    return look:Dot(toTarget) > 0.985
+end
+
+-- Helper: detect headshot using a simple raycast
+local function isHeadshot(enemyChar)
+    local head = enemyChar:FindFirstChild("Head")
+    if not head then return false end
+    local camPos = camera.CFrame.Position
+    local direction = (head.Position - camPos).Unit * 500
+    local ray = Ray.new(camPos, direction)
+    local hit, pos = workspace:FindPartOnRay(ray, plr.Character)
+    if hit and hit:IsDescendantOf(enemyChar) and hit.Name == "Head" then
+        return true
+    end
+    return false
+end
+
+-- Monitor each enemy's health changes
+local function monitorPlayer(player)
+    if player == plr then return end
+    local function onCharacterAdded(char)
+        task.wait(0.5) -- wait for humanoid to load
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum then return end
+        lastHealth[player] = hum.Health
+        hum.HealthChanged:Connect(function(newHealth)
+            if not state.HitNotif then return end
+            local prev = lastHealth[player]
+            if prev and newHealth < prev then
+                local damage = prev - newHealth
+                -- Only trigger if we are aiming at this enemy
+                if isAimingAtCharacter(char) then
+                    local nowTime = tick()
+                    if not lastNotifTime[player] or (nowTime - lastNotifTime[player]) > 0.3 then
+                        lastNotifTime[player] = nowTime
+                        local bodyPart = isHeadshot(char) and "Head" or "Body"
+                        showHitNotification(player.DisplayName, damage, bodyPart)
+                    end
+                end
+            end
+            lastHealth[player] = newHealth
+        end)
+    end
+    player.CharacterAdded:Connect(onCharacterAdded)
+    if player.Character then onCharacterAdded(player.Character) end
+end
+
+-- Connect all existing and future players
+for _, p in pairs(Players:GetPlayers()) do monitorPlayer(p) end
+Players.PlayerAdded:Connect(monitorPlayer)
+Players.PlayerRemoving:Connect(function(p)
+    lastHealth[p] = nil
+    lastNotifTime[p] = nil
 end)
 
 -- ══════════════════════════════════════════
@@ -1182,12 +1325,18 @@ root.Size = UDim2.new(0, rootW, 0, rootH)
 root.Position = UDim2.new(rootPosX, rootPosXO, rootPosY, rootPosYO)
 root.BackgroundColor3 = C.bg
 root.BorderSizePixel = 0
-root.BackgroundTransparency = 1
+root.BackgroundTransparency = 0
 root.ClipsDescendants = true
 root.Parent = screenGui
 Instance.new("UICorner", root).CornerRadius = UDim.new(0,8)
 local rootStroke = Instance.new("UIStroke", root)
 rootStroke.Color = C.neon rootStroke.Thickness = 1.5 rootStroke.Transparency = 1
+
+task.defer(function()
+    if root.AbsolutePosition.X < -root.AbsoluteSize.X or root.AbsolutePosition.X > camera.ViewportSize.X + 200 then
+        root.Position = UDim2.new(0.5, -rootW/2, 0.5, -rootH/2)
+    end
+end)
 
 local titleBarH = isMobileMain and 28 or 36
 local titleBar = Instance.new("Frame")
@@ -1576,6 +1725,8 @@ local vL, vR = createTab("Visuals", 3)
 makeHeader(vL,"Players",1)
 makeToggle(vL,"ESP",          "ESP",         2, nil,               nil)
 makeToggle(vL,"Third Person", "ThirdPerson", 3, enableThirdPerson, disableThirdPerson)
+makeHeader(vL,"Hit Notification",4)
+makeToggle(vL,"Hit Notification","HitNotif", 5, nil, nil)
 
 local wL, wR = createTab("World", 4)
 makeHeader(wL,"Protection",1)
@@ -1583,39 +1734,6 @@ makeToggle(wL,"Prevent OOB",    "NoBounds",      2, enableNoBounds,      disable
 makeToggle(wL,"Remove Killers", "RemoveKillers", 3, enableRemoveKillers, disableRemoveKillers)
 makeToggle(wL,"No Fire Damage", "NoFireDamage",  4, enableNoFireDamage,  disableNoFireDamage)
 makeToggle(wL,"Anti Freeze",    "AntiFreeze",    5, enableAntiFreeze,    disableAntiFreeze)
-
-makeHeader(wR,"Config",1)
-local cfgStatus = Instance.new("TextLabel")
-cfgStatus.Size=UDim2.new(1,0,0,18) cfgStatus.BackgroundTransparency=1
-cfgStatus.Text="💾  Save / Load your cosmetics config" cfgStatus.TextColor3=C.dim
-cfgStatus.TextSize=10 cfgStatus.Font=Enum.Font.Gotham
-cfgStatus.TextXAlignment=Enum.TextXAlignment.Left
-cfgStatus.LayoutOrder=2 cfgStatus.Parent=wR
-
-local function flashCfgStatus(msg, col)
-    cfgStatus.Text = msg cfgStatus.TextColor3 = col or C.neon
-    task.delay(3, function()
-        cfgStatus.Text="💾  Save / Load your cosmetics config" cfgStatus.TextColor3=C.dim
-    end)
-end
-
-makeButton(wR,"💾  Save Config Now",3,function(btn,bs)
-    local ok = pcall(SC_SaveConfig)
-    if ok then btn.Text="✅  Saved!" btn.TextColor3=Color3.fromRGB(0,255,100) bs.Color=Color3.fromRGB(0,255,100)
-        flashCfgStatus("✅  Config saved!", Color3.fromRGB(0,255,100))
-    else btn.Text="❌  Save Failed" btn.TextColor3=C.red
-        flashCfgStatus("❌  Save failed.", C.red) end
-    task.delay(2.5,function() btn.Text="💾  Save Config Now" btn.TextColor3=C.neon bs.Color=C.neon end)
-end)
-
-makeButton(wR,"📂  Load Config Now",4,function(btn,bs)
-    local ok = SC_LoadConfig()
-    if ok then btn.Text="✅  Loaded!" btn.TextColor3=Color3.fromRGB(0,180,255) bs.Color=Color3.fromRGB(0,180,255)
-        flashCfgStatus("✅  Config loaded!", Color3.fromRGB(0,180,255))
-    else btn.Text="❌  No Config Found" btn.TextColor3=C.red
-        flashCfgStatus("❌  No config file found.", C.red) end
-    task.delay(2.5,function() btn.Text="📂  Load Config Now" btn.TextColor3=C.neon bs.Color=C.neon end)
-end)
 
 switchTab("Combat")
 
@@ -1640,14 +1758,14 @@ do
 end
 
 -- ══════════════════════════════════════════
--- SKIN CHANGER — Cosmetic Lists
+-- SKIN CHANGER (full)
 -- ══════════════════════════════════════════
 
 local SkinLists = {
     ["Assault Rifle"]   = {"Default","AK-47","AUG","Tommy Gun","Boneclaw Rifle","Gingerbread AUG","AKEY-47","100K Visits","10 Billion Visits","Phoenix Rifle"},
     ["Bow"]             = {"Default","Compound Bow","Raven Bow","Dream Bow","Bat Bow","Frostbite Bow","Beloved Bow","Balloon Bow","Glorious Bow","Key Bow","Arch Bow"},
     ["Burst Rifle"]     = {"Default","Electro Burst","Aqua Burst","FAMAS","Spectral Burst","Pine Burst"},
-    ["Crossbow"]        = {"Default","Pixel Crossbow","Harpoon Crossbow","Violin Crossbow","Crossbone","Frostbite Crossbow","Glorious Crossbow"},
+    ["Crossbow"]        = {"Default","Pixel Crossbow","Harpoon Crossbow","Violin Crossbow","Crossbone","Frostbite Crossbow","Arch Crossbow","Glorious Crossbow"},
     ["Distortion"]      = {"Default","Plasma Distortion","Magma Distortion","Cyber Distortion","Expirement D15","Sleighstortion"},
     ["Energy Rifle"]    = {"Default","Hacker Rifle","Hydro Rifle","Void Rifle","Soul Rifle","New Years Energy Rifle"},
     ["Flamethrower"]    = {"Default","Pixel Flamethrower","Lamethrower","Glitterthrower","Jack O' Thrower","Snowblower","Keythrower","Rainbowthrower"},
@@ -1659,7 +1777,7 @@ local SkinLists = {
     ["Shotgun"]         = {"Default","Balloon Shotgun","Hyper Shotgun","Cactus Shotgun","Broomstick","Wrapped Shotgun"},
     ["Sniper"]          = {"Default","Pixel Sniper","Hyper Sniper","Event Horizon","Eyething Sniper","Gingerbread Sniper","Keyper","Glorious Sniper"},
     ["Daggers"]         = {"Default","Aces","Paper Planes","Shurikens","Bat Daggers","Cookies","Crystal Daggers","Keynais"},
-    ["Energy Pistols"]  = {"Default","Void Pistols","Hydro Pistols","Soul Pistols",},
+    ["Energy Pistols"]  = {"Default","Void Pistols","Hydro Pistols","Soul Pistols","New Years Energy Pistols"},
     ["Exogun"]          = {"Default","Singularity","Raygun","Repulsor","Exogourd","Midnight Festive Exogun"},
     ["Flare Gun"]       = {"Default","Firework Gun","Dynamite Gun","Banana Flare","Vexed Flare Gun","Wrapped Flare Gun"},
     ["Handgun"]         = {"Default","Blaster","Hand Gun","Stealth Handgun","Pumpkin Handgun","Gingerbread Handgun"},
@@ -1693,7 +1811,6 @@ local SkinLists = {
 }
 
 local WrapList = {
-    -- Standard
     "None","Gold","Diamond","Midas Touch","Community Wrap","Blush Wrapping","Brain","Crystalliz",
     "Damascus","Black Damascus",".exe wrap","Groove","Hollow Wrap","Hesper","Hyperdrive",
     "Gingerbread","Neon Lights","Hologram Arena","Sunset","Pink Lemonade","Lovely Leopard",
@@ -1703,11 +1820,9 @@ local WrapList = {
     "Nauseite","Sensite","Urban Camo","Invisible","Arcane","Eruption","Borealis",
     "Mainframe Wrap","Honeycomb Wrap","Virus","Patriot","PB&J Wrap","Scribble",
     "Net","Solar","Festive Lights","Polaris","Woven","Heartfelt","Chromatic","Dark Matter",
-    -- Developer Wraps
     "Dev Wrap","Admin Wrap","Staff Wrap","Shedletsky Wrap","Telamon Wrap","Badimo Wrap",
     "Mango Wrap","Lava Wrap","Developer","Intern Wrap","Alpha Tester","Beta Tester",
     "Founder Wrap","Creator Wrap","Scripter Wrap","Builder Wrap",
-    -- Contract / Battle Pass Wraps
     "Season 1 Wrap","Season 2 Wrap","Season 3 Wrap","Season 4 Wrap","Season 5 Wrap","Season 6 Wrap",
     "Contract Wrap I","Contract Wrap II","Contract Wrap III","Contract Wrap IV","Contract Wrap V",
     "Bronze Contract","Silver Contract","Gold Contract","Platinum Contract","Diamond Contract",
@@ -1717,126 +1832,33 @@ local WrapList = {
 }
 
 local CharmList = {
-    "None",
-    -- Standard
-    "Rivals Logo","Sword","Shield","Crown","Star","Heart","Skull","Key","Flame","Ice Crystal",
+    "None","Rivals Logo","Sword","Shield","Crown","Star","Heart","Skull","Key","Flame","Ice Crystal",
     "Lightning","Cherry Blossom","Pumpkin","Snowflake","Rainbow","Diamond Charm","Ruby","Emerald",
     "Sapphire","Amethyst","Gold Coin","Dice","Clover","Mushroom","Flower","Butterfly","Dragon",
     "Phoenix","Wolf","Cat","Bunny","Frog","Duck","Jellyfish","Crab","Anchor","Compass","Lantern",
     "Gem","Pearl","Feather","Rose","Sunflower","Cactus","Sword Charm","Dagger Charm","Axe Charm",
     "Bow Charm","Shield Charm","Bomb","Rocket","UFO","Planet","Moon","Sun","Cloud","Rainbow Star",
-    -- Seasonal
     "Halloween Charm","Christmas Charm","Easter Charm","Valentine Charm","New Year Charm",
     "Summer Charm","Winter Charm","Spring Charm","Fall Charm",
-    -- Rarity
     "Common Charm","Uncommon Charm","Rare Charm","Epic Charm","Legendary Charm","Mythical Charm",
-    -- Dev / Contract
     "Dev Charm","Admin Charm","Staff Charm","Founder Charm","Alpha Charm","Beta Charm",
     "Season 1 Charm","Season 2 Charm","Season 3 Charm","Season 4 Charm","Season 5 Charm",
     "Contract Charm","Victory Charm","Champion Charm","Prestige Charm",
 }
 
 local FinisherList = {
-    "None",
-    -- Default
-    "Ragdoll",
-    -- Common
-    "Folded",
-    "Very Tragic Banana Peel Accident",
-    "Chalked",
-    "Digitize",
-    "Squawk",
-    "Delete",
-    "Flop",
-    "Confetti",
-    "Hacked",
-    "Petrify",
-    "Toot",
-    "Yoink",
-    "Spooky Confetti",
-    "Bite",
-    "Batsplosion",
-    "Festive Confetti",
-    "Wrapped",
-    "Blip",
-    "Chill Out",
-    "Coalify",
-    "Faceplant",
-    "For Glory",
-    "Northern Light Show",
-    "Warped Away",
-    -- Rare
-    "Hooked",
-    "Bad Mood",
-    "Heavy Head",
-    "Roadrunner",
-    "Ascend",
-    "Flick",
-    "Collapse",
-    "Freeze",
-    "High Gravity",
-    "Midas Touch",
-    "Rush",
-    "Splatter",
-    "Tremble",
-    "Reaper",
-    "Lost Soul",
-    "Bonesplosion",
-    "Frozen",
-    "Gingerbreadify",
-    "Bogey",
-    "Decorated Player",
-    "Snowmanify",
-    "Warp Sickness",
-    -- Legendary
-    "Balloons",
-    "BONK!",
-    "Boogie",
-    "Darkheart",
-    "Rainbow Barf",
-    "Clapped",
-    "Enlightened",
-    "Crushed",
-    "GOOAAALLLL",
-    "Chark Attack",
-    "Diamond Hands",
-    "Electrocute",
-    "Heartbeat",
-    "Ignite",
-    "Low Gravity",
-    "OOF",
-    "Opulent",
-    "Orbital Strike",
-    "Pixel Coins",
-    "Stiff",
-    "Tough Crowd",
-    "Zombified",
-    "RIP",
-    "Disintegrate",
-    "Broom Ride",
-    "Snowballed",
-    "Falling Icicles",
-    "David",
-    "Giant Ice Spike",
-    "DRIP",
-    "Beacon",
-    "Erased",
-    "Firework Show",
-    "Giant Snowball",
-    "Impaled",
-    "Sleigh Away",
-    "Spaghettified",
-    "Those Who Know",
-    -- Special
-    "Jolly Judgement",
-    "Director's Cut",
-    "Elfify",
-    "5B Visits",
+    "None","Ragdoll","Folded","Very Tragic Banana Peel Accident","Chalked","Digitize","Squawk","Delete","Flop",
+    "Confetti","Hacked","Petrify","Toot","Yoink","Spooky Confetti","Bite","Batsplosion","Festive Confetti",
+    "Wrapped","Blip","Chill Out","Coalify","Faceplant","For Glory","Northern Light Show","Warped Away",
+    "Hooked","Bad Mood","Heavy Head","Roadrunner","Ascend","Flick","Collapse","Freeze","High Gravity",
+    "Midas Touch","Rush","Splatter","Tremble","Reaper","Lost Soul","Bonesplosion","Frozen","Gingerbreadify",
+    "Bogey","Decorated Player","Snowmanify","Warp Sickness","Balloons","BONK!","Boogie","Darkheart",
+    "Rainbow Barf","Clapped","Enlightened","Crushed","GOOAAALLLL","Chark Attack","Diamond Hands",
+    "Electrocute","Heartbeat","Ignite","Low Gravity","OOF","Opulent","Orbital Strike","Pixel Coins",
+    "Stiff","Tough Crowd","Zombified","RIP","Disintegrate","Broom Ride","Snowballed","Falling Icicles",
+    "David","Giant Ice Spike","DRIP","Beacon","Erased","Firework Show","Giant Snowball","Impaled",
+    "Sleigh Away","Spaghettified","Those Who Know","Jolly Judgement","Director's Cut","Elfify","5B Visits",
 }
-
--- ══════════════════════════════════════════
--- SKIN CHANGER — Save / Load
--- ══════════════════════════════════════════
 
 local SAVE_FILE = "AnihaSkinConfig.json"
 
@@ -1879,9 +1901,6 @@ local function SC_LoadConfig()
     end
     return false
 end
--- ══════════════════════════════════════════
--- SKIN CHANGER — Module Loader
--- ══════════════════════════════════════════
 
 local function robust_require(module)
     local mName = tostring(module)
@@ -1918,596 +1937,562 @@ local function robust_require(module)
     return nil
 end
 
--- ══════════════════════════════════════════
--- SKIN CHANGER — Main
--- ══════════════════════════════════════════
-
 task.spawn(function()
     task.wait(1.5)
-    local SC_Cosmetic  = robust_require(ReplicatedStorage:WaitForChild("Modules",20):WaitForChild("CosmeticLibrary",20))
-    local SC_Item      = robust_require(ReplicatedStorage.Modules:WaitForChild("ItemLibrary",20))
-    local SC_RepClass  = robust_require(ReplicatedStorage.Modules:WaitForChild("ReplicatedClass",20))
-    local SC_Modules   = plr.PlayerScripts:WaitForChild("Modules",15)
-    local SC_ViewModel = robust_require(SC_Modules:WaitForChild("ClientReplicatedClasses",15):WaitForChild("ClientFighter",15):WaitForChild("ClientItem",15):WaitForChild("ClientViewModel",15))
+    local success, err = pcall(function()
+        local SC_Cosmetic  = robust_require(ReplicatedStorage:WaitForChild("Modules",20):WaitForChild("CosmeticLibrary",20))
+        local SC_Item      = robust_require(ReplicatedStorage.Modules:WaitForChild("ItemLibrary",20))
+        local SC_RepClass  = robust_require(ReplicatedStorage.Modules:WaitForChild("ReplicatedClass",20))
+        local SC_Modules   = plr.PlayerScripts:WaitForChild("Modules",15)
+        local SC_ViewModel = robust_require(SC_Modules:WaitForChild("ClientReplicatedClasses",15):WaitForChild("ClientFighter",15):WaitForChild("ClientItem",15):WaitForChild("ClientViewModel",15))
 
-    if not SC_Cosmetic or not SC_Item or not SC_ViewModel or not SC_RepClass then
-        warn("[Skin Changer] Failed to load required modules.")
-        return
-    end
+        if not SC_Cosmetic or not SC_Item or not SC_ViewModel or not SC_RepClass then
+            warn("[Skin Changer] Failed to load required modules.")
+            return
+        end
 
-    -- Search all sub-tables of SC_Cosmetic for a cosmetic by name
-    local function getCosmeticData(name, cType)
-        local base
-        if SC_Cosmetic.Cosmetics then base = SC_Cosmetic.Cosmetics[name] end
-        if not base and type(SC_Cosmetic)=="table" then
-            for _, tbl in pairs(SC_Cosmetic) do
-                if type(tbl)=="table" and rawget(tbl, name) then
-                    base = tbl[name] break
+        local function getCosmeticData(name, cType)
+            local base
+            if SC_Cosmetic.Cosmetics then base = SC_Cosmetic.Cosmetics[name] end
+            if not base and type(SC_Cosmetic)=="table" then
+                for _, tbl in pairs(SC_Cosmetic) do
+                    if type(tbl)=="table" and rawget(tbl, name) then
+                        base = tbl[name] break
+                    end
+                end
+            end
+            if not base then return nil end
+            local data = table.clone(base)
+            data.Name = name data.Type = cType
+            return data
+        end
+
+        local function tryEquipGlobal(typeName, itemName)
+            local val = itemName ~= "None" and itemName or nil
+            local cd  = val and getCosmeticData(val, typeName)
+            pcall(function() SC_Cosmetic.Equip(nil, typeName, val) end)
+            pcall(function() SC_Cosmetic.Equip(typeName, val) end)
+            if typeName == "Charm" then
+                pcall(function() SC_Cosmetic.EquipCharm(val) end)
+                pcall(function() SC_Cosmetic.SetCharm(val) end)
+                pcall(function() SC_Cosmetic.SetCharm(cd) end)
+            elseif typeName == "Finisher" then
+                pcall(function() SC_Cosmetic.EquipFinisher(val) end)
+                pcall(function() SC_Cosmetic.SetFinisher(val) end)
+                pcall(function() SC_Cosmetic.SetFinisher(cd) end)
+            end
+            for _, v in pairs(getgc(true)) do
+                if type(v)=="function" then
+                    local n = tostring(v):lower()
+                    if typeName=="Charm" and (n:find("charm") or n:find("equip")) then
+                        pcall(v, val) pcall(v, cd)
+                    elseif typeName=="Finisher" and (n:find("finish") or n:find("equip")) then
+                        pcall(v, val) pcall(v, cd)
+                    end
                 end
             end
         end
-        if not base then return nil end
-        local data = table.clone(base)
-        data.Name = name data.Type = cType
-        return data
-    end
 
-    -- Try every known equip signature for global cosmetics (charms, finishers)
-    local function tryEquipGlobal(typeName, itemName)
-        local val = itemName ~= "None" and itemName or nil
-        local cd  = val and getCosmeticData(val, typeName)
-        pcall(function() SC_Cosmetic.Equip(nil, typeName, val) end)
-        pcall(function() SC_Cosmetic.Equip(typeName, val) end)
-        if typeName == "Charm" then
-            pcall(function() SC_Cosmetic.EquipCharm(val) end)
-            pcall(function() SC_Cosmetic.SetCharm(val) end)
-            pcall(function() SC_Cosmetic.SetCharm(cd) end)
-        elseif typeName == "Finisher" then
-            pcall(function() SC_Cosmetic.EquipFinisher(val) end)
-            pcall(function() SC_Cosmetic.SetFinisher(val) end)
-            pcall(function() SC_Cosmetic.SetFinisher(cd) end)
-        end
-        -- GC fallback: call any function whose name suggests it handles this type
-        for _, v in pairs(getgc(true)) do
-            if type(v)=="function" then
-                local n = tostring(v):lower()
-                if typeName=="Charm" and (n:find("charm") or n:find("equip")) then
-                    pcall(v, val) pcall(v, cd)
-                elseif typeName=="Finisher" and (n:find("finish") or n:find("equip")) then
-                    pcall(v, val) pcall(v, cd)
+        local oldGetWrap = SC_ViewModel.GetWrap
+        SC_ViewModel.GetWrap = function(self)
+            local ok, res = pcall(function()
+                local wn = self.ClientItem and self.ClientItem.Name
+                if wn and _G.EquippedData[wn] then
+                    local wrap = _G.EquippedData[wn].Wrap
+                    if wrap and wrap ~= "None" then return getCosmeticData(wrap, "Wrap") end
                 end
-            end
+            end)
+            if ok and res then return res end
+            return oldGetWrap(self)
         end
-    end
 
-    -- Hook GetWrap
-    local oldGetWrap = SC_ViewModel.GetWrap
-    SC_ViewModel.GetWrap = function(self)
-        local ok, res = pcall(function()
-            local wn = self.ClientItem and self.ClientItem.Name
-            if wn and _G.EquippedData[wn] then
-                local wrap = _G.EquippedData[wn].Wrap
-                if wrap and wrap ~= "None" then return getCosmeticData(wrap, "Wrap") end
-            end
-        end)
-        if ok and res then return res end
-        return oldGetWrap(self)
-    end
-
-    -- Hook GetCharm if it exists
-    if SC_ViewModel.GetCharm then
-        local oldGetCharm = SC_ViewModel.GetCharm
-        SC_ViewModel.GetCharm = function(self)
-            if _G.GlobalData.Charm ~= "None" then
-                local cd = getCosmeticData(_G.GlobalData.Charm, "Charm")
-                if cd then return cd end
-            end
-            return oldGetCharm(self)
-        end
-    end
-
-    -- Hook GetFinisher if it exists
-    if SC_ViewModel.GetFinisher then
-        local oldGetFinisher = SC_ViewModel.GetFinisher
-        SC_ViewModel.GetFinisher = function(self)
-            if _G.GlobalData.Finisher ~= "None" then
-                local cd = getCosmeticData(_G.GlobalData.Finisher, "Finisher")
-                if cd then return cd end
-            end
-            return oldGetFinisher(self)
-        end
-    end
-
-    -- Hook new — inject skin, charm, and finisher into replicatedData
-    local oldNew = SC_ViewModel.new
-    SC_ViewModel.new = function(replicatedData, clientItem)
-        pcall(function()
-            if not clientItem then return end
-            local wn = clientItem.Name if not wn then return end
-            local cf = rawget(clientItem,"ClientFighter") or clientItem.ClientFighter
-            if not cf or cf.Player ~= plr then return end
-
-            local dk      = SC_RepClass:ToEnum("Data")
-            local skinKey = SC_RepClass:ToEnum("Skin")
-            local nameKey = SC_RepClass:ToEnum("Name")
-            local ok1, charmKey    = pcall(function() return SC_RepClass:ToEnum("Charm") end)
-            local ok2, finisherKey = pcall(function() return SC_RepClass:ToEnum("Finisher") end)
-            replicatedData[dk] = replicatedData[dk] or {}
-
-            -- Inject skin
-            if _G.EquippedData[wn] then
-                local skin = _G.EquippedData[wn].Skin
-                if skin and skin ~= "Default" then
-                    local cd = getCosmeticData(skin, "Skin")
-                    if cd then replicatedData[dk][skinKey]=cd replicatedData[dk][nameKey]=skin end
+        if SC_ViewModel.GetCharm then
+            local oldGetCharm = SC_ViewModel.GetCharm
+            SC_ViewModel.GetCharm = function(self)
+                if _G.GlobalData.Charm ~= "None" then
+                    local cd = getCosmeticData(_G.GlobalData.Charm, "Charm")
+                    if cd then return cd end
                 end
+                return oldGetCharm(self)
             end
-
-            -- Inject charm
-            if ok1 and _G.GlobalData.Charm ~= "None" then
-                local cd = getCosmeticData(_G.GlobalData.Charm, "Charm")
-                if cd then replicatedData[dk][charmKey] = cd end
-            end
-
-            -- Inject finisher
-            if ok2 and _G.GlobalData.Finisher ~= "None" then
-                local cd = getCosmeticData(_G.GlobalData.Finisher, "Finisher")
-                if cd then replicatedData[dk][finisherKey] = cd end
-            end
-        end)
-        local vm = oldNew(replicatedData, clientItem)
-        task.delay(0.1, function()
-            pcall(function() if vm and vm._UpdateWrap     then vm:_UpdateWrap()     end end)
-            pcall(function() if vm and vm._UpdateCharm    then vm:_UpdateCharm()    end end)
-            pcall(function() if vm and vm._UpdateFinisher then vm:_UpdateFinisher() end end)
-        end)
-        return vm
-    end
-
-    -- ══════════════════════════════════════════
-    -- SKIN CHANGER — GUI
-    -- ══════════════════════════════════════════
-
-    local SC_Gui = Instance.new("ScreenGui", plr.PlayerGui)
-    SC_Gui.ResetOnSpawn = false
-    SC_Gui.Name = "CyberDragonSkinChanger"
-    SC_Gui.Parent = plr.PlayerGui
-
-    -- Reuse the mobile detection from the main UI
-    local isMobile = isMobileMain
-
-    -- Mobile uses a smaller window that fits a phone/tablet screen
-    local mainW = isMobile and 620 or 950
-    local mainH = isMobile and 480 or 660
-
-    local SC_Main = Instance.new("Frame", SC_Gui)
-    SC_Main.Size = UDim2.new(0, mainW, 0, mainH)
-    SC_Main.Position = UDim2.new(0.5, -mainW/2, 0.5, -mainH/2)
-    SC_Main.BackgroundColor3 = Color3.fromRGB(20,20,24)
-    SC_Main.BorderSizePixel = 0
-    SC_Main.Visible = false
-
-    -- ── Mobile open button (bottom-right, only shown on mobile) ──
-    if isMobile then
-        local mobileBtn = Instance.new("TextButton", SC_Gui)
-        mobileBtn.Size = UDim2.new(0,70,0,70)
-        mobileBtn.Position = UDim2.new(1,-85,1,-155)  -- bottom-right, above jump button
-        mobileBtn.BackgroundColor3 = Color3.fromRGB(0,180,140)
-        mobileBtn.BorderSizePixel = 0
-        mobileBtn.Text = "👗"
-        mobileBtn.TextSize = 30
-        mobileBtn.Font = Enum.Font.GothamBold
-        mobileBtn.ZIndex = 10
-        Instance.new("UICorner", mobileBtn).CornerRadius = UDim.new(1,0)
-        local mStroke = Instance.new("UIStroke", mobileBtn)
-        mStroke.Color = Color3.fromRGB(0,255,200)
-        mStroke.Thickness = 2
-
-        -- Pulse animation so players can find it easily
-        task.spawn(function()
-            while mobileBtn.Parent do
-                TweenService:Create(mobileBtn, TweenInfo.new(0.7,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut), {BackgroundColor3=Color3.fromRGB(0,120,100)}):Play()
-                task.wait(0.7)
-                TweenService:Create(mobileBtn, TweenInfo.new(0.7,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut), {BackgroundColor3=Color3.fromRGB(0,180,140)}):Play()
-                task.wait(0.7)
-            end
-        end)
-
-        mobileBtn.MouseButton1Click:Connect(function()
-            SC_Main.Visible = not SC_Main.Visible
-        end)
-    end
-
-    local SC_Title = Instance.new("TextLabel", SC_Main)
-    SC_Title.Size = UDim2.new(1,0,0, isMobile and 40 or 50)
-    SC_Title.BackgroundColor3 = Color3.fromRGB(30,30,35)
-    SC_Title.Text = isMobile and "◈ Cyber Dragon Skin Changer" or "◈ Cyber Dragon Skin Changer  •  [ K ] Toggle"
-    SC_Title.TextColor3 = Color3.fromRGB(0,255,200)
-    SC_Title.Font = Enum.Font.GothamBlack
-    SC_Title.TextSize = isMobile and 16 or 20
-    SC_Title.BorderSizePixel = 0
-    SC_Title.Active = true
-
-    local SC_Left = Instance.new("Frame", SC_Main)
-    local leftW = isMobile and 180 or 280
-    SC_Left.Size = UDim2.new(0, leftW, 1, -110)
-    SC_Left.Position = UDim2.new(0,10,0,isMobile and 45 or 60)
-    SC_Left.BackgroundColor3 = Color3.fromRGB(14,14,20)
-    SC_Left.BorderSizePixel = 0
-
-    local SC_Search = Instance.new("TextBox", SC_Left)
-    SC_Search.Size = UDim2.new(1,-20,0,35)
-    SC_Search.Position = UDim2.new(0,10,0,10)
-    SC_Search.PlaceholderText = "Search weapon..."
-    SC_Search.BackgroundColor3 = Color3.fromRGB(20,20,30)
-    SC_Search.TextColor3 = Color3.new(1,1,1)
-    SC_Search.Font = Enum.Font.Gotham
-    SC_Search.TextSize = 14
-    SC_Search.BorderSizePixel = 0
-    SC_Search.ClearTextOnFocus = false
-    SC_Search.Text = ""
-
-    local SC_WeaponScroll = Instance.new("ScrollingFrame", SC_Left)
-    SC_WeaponScroll.Size = UDim2.new(1,-20,1,-55)
-    SC_WeaponScroll.Position = UDim2.new(0,10,0,55)
-    SC_WeaponScroll.BackgroundTransparency = 1
-    SC_WeaponScroll.ScrollBarThickness = isMobile and 2 or 4
-    SC_WeaponScroll.BorderSizePixel = 0
-    SC_WeaponScroll.ScrollingDirection = Enum.ScrollingDirection.Y
-    local SC_WLayout = Instance.new("UIListLayout", SC_WeaponScroll)
-    SC_WLayout.Padding = UDim.new(0,5)
-    SC_WLayout.SortOrder = Enum.SortOrder.Name
-
-    local rightX = isMobile and (leftW + 20) or 305
-    local rightW = isMobile and (mainW - leftW - 30) or (mainW - 310)
-    local SC_Right = Instance.new("Frame", SC_Main)
-    SC_Right.Size = UDim2.new(0, rightW, 1, -110)
-    SC_Right.Position = UDim2.new(0, rightX, 0, isMobile and 45 or 60)
-    SC_Right.BackgroundColor3 = Color3.fromRGB(14,14,20)
-    SC_Right.BorderSizePixel = 0
-
-    local SC_SelLabel = Instance.new("TextLabel", SC_Right)
-    SC_SelLabel.Size = UDim2.new(1,-20,0,30)
-    SC_SelLabel.Position = UDim2.new(0,10,0,8)
-    SC_SelLabel.BackgroundTransparency = 1
-    SC_SelLabel.Text = "Select a weapon"
-    SC_SelLabel.TextColor3 = Color3.fromRGB(200,200,200)
-    SC_SelLabel.Font = Enum.Font.GothamBold
-    SC_SelLabel.TextSize = 16
-
-    -- 4-tab bar: Skins | Wraps | Charms | Finishers
-    local SC_TabBar = Instance.new("Frame", SC_Right)
-    SC_TabBar.Size = UDim2.new(1,-20,0,28)
-    SC_TabBar.Position = UDim2.new(0,10,0,42)
-    SC_TabBar.BackgroundColor3 = Color3.fromRGB(20,20,30)
-    SC_TabBar.BorderSizePixel = 0
-    Instance.new("UICorner",SC_TabBar).CornerRadius = UDim.new(0,6)
-
-    local function SC_MakeTabBtn(text, xScale)
-        local b = Instance.new("TextButton", SC_TabBar)
-        b.Size = UDim2.new(0.25,-3,1,-4)
-        b.Position = UDim2.new(xScale,2,0,2)
-        b.BackgroundColor3 = Color3.fromRGB(14,14,20)
-        b.Text = text
-        b.TextColor3 = Color3.fromRGB(90,130,120)
-        b.Font = Enum.Font.GothamBold
-        b.TextSize = 11
-        b.BorderSizePixel = 0
-        Instance.new("UICorner",b).CornerRadius = UDim.new(0,5)
-        return b
-    end
-
-    local SkinsTabBtn    = SC_MakeTabBtn("🎨 Skins",    0)
-    local WrapsTabBtn    = SC_MakeTabBtn("🎁 Wraps",    0.25)
-    local CharmsTabBtn   = SC_MakeTabBtn("🔮 Charms",   0.5)
-    local FinishTabBtn   = SC_MakeTabBtn("⚔️ Finish",   0.75)
-
-    local function makeContentScroll(cellW, cellH)
-        -- On mobile shrink cells so more fit on the smaller screen
-        local cw = isMobile and math.floor(cellW * 0.75) or cellW
-        local ch = isMobile and math.floor(cellH * 0.75) or cellH
-        local sf = Instance.new("ScrollingFrame", SC_Right)
-        sf.Size = UDim2.new(1,-20,1,-80)
-        sf.Position = UDim2.new(0,10,0,76)
-        sf.BackgroundTransparency = 1
-        sf.ScrollBarThickness = isMobile and 2 or 6
-        sf.BorderSizePixel = 0
-        sf.Visible = false
-        sf.ScrollingDirection = Enum.ScrollingDirection.Y
-        local g = Instance.new("UIGridLayout", sf)
-        g.CellSize = UDim2.new(0,cw,0,ch)
-        g.CellPadding = UDim2.new(0,8,0,8)
-        return sf, g
-    end
-
-    local SC_SkinScroll,    SC_SkinGrid    = makeContentScroll(130, 155)
-    local SC_WrapScroll,    SC_WrapGrid    = makeContentScroll(130, 50)
-    local SC_CharmScroll,   SC_CharmGrid   = makeContentScroll(130, 50)
-    local SC_FinishScroll,  SC_FinishGrid  = makeContentScroll(130, 50)
-    SC_SkinScroll.Visible = true
-
-    local SC_ActiveTab = "Skins"
-
-    local function SC_SetTab(tab)
-        SC_ActiveTab = tab
-        SC_SkinScroll.Visible   = (tab == "Skins")
-        SC_WrapScroll.Visible   = (tab == "Wraps")
-        SC_CharmScroll.Visible  = (tab == "Charms")
-        SC_FinishScroll.Visible = (tab == "Finish")
-        local neon = Color3.fromRGB(0,255,200)
-        local dim  = Color3.fromRGB(90,130,120)
-        local bon  = Color3.fromRGB(0,60,50)
-        local boff = Color3.fromRGB(14,14,20)
-        for _, pair in pairs({
-            {SkinsTabBtn,  "Skins"},
-            {WrapsTabBtn,  "Wraps"},
-            {CharmsTabBtn, "Charms"},
-            {FinishTabBtn, "Finish"},
-        }) do
-            pair[1].BackgroundColor3 = tab==pair[2] and bon or boff
-            pair[1].TextColor3       = tab==pair[2] and neon or dim
         end
-    end
-    SC_SetTab("Skins")
 
-    SkinsTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Skins")  end)
-    WrapsTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Wraps")  end)
-    CharmsTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Charms") end)
-    FinishTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Finish") end)
-
-    -- Toolbar
-    local SC_Toolbar = Instance.new("Frame", SC_Main)
-    SC_Toolbar.Size = UDim2.new(1,0,0,48)
-    SC_Toolbar.Position = UDim2.new(0,0,1,-48)
-    SC_Toolbar.BackgroundColor3 = Color3.fromRGB(20,20,30)
-    SC_Toolbar.BorderSizePixel = 0
-
-    local SC_Status = Instance.new("TextLabel", SC_Toolbar)
-    SC_Status.Size = UDim2.new(1,-310,1,0)
-    SC_Status.Position = UDim2.new(0,15,0,0)
-    SC_Status.BackgroundTransparency = 1
-    SC_Status.Text = "Ready"
-    SC_Status.TextColor3 = Color3.fromRGB(90,130,120)
-    SC_Status.Font = Enum.Font.Gotham
-    SC_Status.TextSize = 13
-    SC_Status.TextXAlignment = Enum.TextXAlignment.Left
-
-    local function SC_Flash(msg, col)
-        SC_Status.Text = msg
-        SC_Status.TextColor3 = col or Color3.fromRGB(0,255,200)
-        task.delay(3, function()
-            SC_Status.Text = "Ready"
-            SC_Status.TextColor3 = Color3.fromRGB(90,130,120)
-        end)
-    end
-
-    local function SC_MakeBtn(text, xOff, col)
-        local b = Instance.new("TextButton", SC_Toolbar)
-        b.Size = UDim2.new(0,140,0,32)
-        b.Position = UDim2.new(1,xOff,0.5,-16)
-        b.BackgroundColor3 = col
-        b.Text = text
-        b.TextColor3 = Color3.new(1,1,1)
-        b.Font = Enum.Font.GothamBold
-        b.TextSize = 13
-        b.BorderSizePixel = 0
-        Instance.new("UICorner",b).CornerRadius = UDim.new(0,5)
-        return b
-    end
-
-    local SC_SaveBtn = SC_MakeBtn("💾  Save Config", -300, Color3.fromRGB(30,90,30))
-    local SC_LoadBtn = SC_MakeBtn("📂  Load Config", -150, Color3.fromRGB(30,60,130))
-
-    SC_SaveBtn.MouseButton1Click:Connect(function()
-        SC_SaveConfig()
-        SC_Flash("✅ Config saved!")
-    end)
-    SC_LoadBtn.MouseButton1Click:Connect(function()
-        if SC_LoadConfig() then
-            for weapon, info in pairs(_G.EquippedData) do
-                if info.Skin ~= "Default" then
-                    pcall(function() SC_Cosmetic.Equip(weapon, "Skin", info.Skin) end)
+        if SC_ViewModel.GetFinisher then
+            local oldGetFinisher = SC_ViewModel.GetFinisher
+            SC_ViewModel.GetFinisher = function(self)
+                if _G.GlobalData.Finisher ~= "None" then
+                    local cd = getCosmeticData(_G.GlobalData.Finisher, "Finisher")
+                    if cd then return cd end
                 end
+                return oldGetFinisher(self)
             end
-            SC_Flash("✅ Config loaded!", Color3.fromRGB(100,180,255))
-        else
-            SC_Flash("❌ No config found!", Color3.fromRGB(220,80,80))
         end
-    end)
 
-    -- Equip helpers
-    local function SC_EquipSkin(weapon, skin)
-        _G.EquippedData[weapon].Skin = skin
-        pcall(function() SC_Cosmetic.Equip(weapon, "Skin", skin) end)
-        SC_SelLabel.Text = "✅  " .. weapon .. "  —  " .. skin
-    end
-
-    local function SC_EquipWrap(weapon, wrap)
-        _G.EquippedData[weapon].Wrap = wrap
-        pcall(function() SC_Cosmetic.Equip(weapon, "Wrap", wrap ~= "None" and wrap or nil) end)
-        SC_SelLabel.Text = "✅  " .. weapon .. "  —  Wrap: " .. wrap
-    end
-
-    -- Build a generic list scroll (for wraps per-weapon, charms, finishers)
-    local function buildListScroll(scroll, grid, list, getSelected, onSelect)
-        for _, c in pairs(scroll:GetChildren()) do
-            if c:IsA("TextButton") then c:Destroy() end
-        end
-        for _, item in ipairs(list) do
-            local wb = Instance.new("TextButton")
-            wb.Size = UDim2.new(1,0,1,0)
-            wb.BackgroundColor3 = getSelected()==item and Color3.fromRGB(0,60,50) or Color3.fromRGB(20,20,30)
-            wb.Text = item
-            wb.TextColor3 = Color3.fromRGB(210,255,245)
-            wb.Font = Enum.Font.GothamSemibold
-            wb.TextSize = 12
-            wb.BorderSizePixel = 0
-            wb.Parent = scroll
-            wb.TextScaled = true
-            Instance.new("UICorner",wb).CornerRadius = UDim.new(0,5)
-            wb.MouseButton1Click:Connect(function()
-                for _, c2 in pairs(scroll:GetChildren()) do
-                    if c2:IsA("TextButton") then c2.BackgroundColor3=Color3.fromRGB(20,20,30) end
+        local oldNew = SC_ViewModel.new
+        SC_ViewModel.new = function(replicatedData, clientItem)
+            pcall(function()
+                if not clientItem then return end
+                local wn = clientItem.Name if not wn then return end
+                local cf = rawget(clientItem,"ClientFighter") or clientItem.ClientFighter
+                if not cf or cf.Player ~= plr then return end
+                local dk      = SC_RepClass:ToEnum("Data")
+                local skinKey = SC_RepClass:ToEnum("Skin")
+                local nameKey = SC_RepClass:ToEnum("Name")
+                local ok1, charmKey    = pcall(function() return SC_RepClass:ToEnum("Charm") end)
+                local ok2, finisherKey = pcall(function() return SC_RepClass:ToEnum("Finisher") end)
+                replicatedData[dk] = replicatedData[dk] or {}
+                if _G.EquippedData[wn] then
+                    local skin = _G.EquippedData[wn].Skin
+                    if skin and skin ~= "Default" then
+                        local cd = getCosmeticData(skin, "Skin")
+                        if cd then replicatedData[dk][skinKey]=cd replicatedData[dk][nameKey]=skin end
+                    end
                 end
-                wb.BackgroundColor3 = Color3.fromRGB(0,60,50)
-                onSelect(item)
+                if ok1 and _G.GlobalData.Charm ~= "None" then
+                    local cd = getCosmeticData(_G.GlobalData.Charm, "Charm")
+                    if cd then replicatedData[dk][charmKey] = cd end
+                end
+                if ok2 and _G.GlobalData.Finisher ~= "None" then
+                    local cd = getCosmeticData(_G.GlobalData.Finisher, "Finisher")
+                    if cd then replicatedData[dk][finisherKey] = cd end
+                end
+            end)
+            local vm = oldNew(replicatedData, clientItem)
+            task.delay(0.1, function()
+                pcall(function() if vm and vm._UpdateWrap     then vm:_UpdateWrap()     end end)
+                pcall(function() if vm and vm._UpdateCharm    then vm:_UpdateCharm()    end end)
+                pcall(function() if vm and vm._UpdateFinisher then vm:_UpdateFinisher() end end)
+            end)
+            return vm
+        end
+
+        local SC_Gui = Instance.new("ScreenGui", plr.PlayerGui)
+        SC_Gui.ResetOnSpawn = false
+        SC_Gui.Name = "CyberDragonSkinChanger"
+        SC_Gui.Parent = plr.PlayerGui
+
+        local isMobile = isMobileMain
+        local mainW = isMobile and 620 or 950
+        local mainH = isMobile and 480 or 660
+        local SC_Main = Instance.new("Frame", SC_Gui)
+        SC_Main.Size = UDim2.new(0, mainW, 0, mainH)
+        SC_Main.Position = UDim2.new(0.5, -mainW/2, 0.5, -mainH/2)
+        SC_Main.BackgroundColor3 = Color3.fromRGB(20,20,24)
+        SC_Main.BorderSizePixel = 0
+        SC_Main.Visible = false
+
+        if isMobile then
+            local mobileBtn = Instance.new("TextButton", SC_Gui)
+            mobileBtn.Size = UDim2.new(0,70,0,70)
+            mobileBtn.Position = UDim2.new(1,-85,1,-155)
+            mobileBtn.BackgroundColor3 = Color3.fromRGB(0,180,140)
+            mobileBtn.BorderSizePixel = 0
+            mobileBtn.Text = "👗"
+            mobileBtn.TextSize = 30
+            mobileBtn.Font = Enum.Font.GothamBold
+            mobileBtn.ZIndex = 10
+            Instance.new("UICorner", mobileBtn).CornerRadius = UDim.new(1,0)
+            local mStroke = Instance.new("UIStroke", mobileBtn)
+            mStroke.Color = Color3.fromRGB(0,255,200)
+            mStroke.Thickness = 2
+            task.spawn(function()
+                while mobileBtn.Parent do
+                    TweenService:Create(mobileBtn, TweenInfo.new(0.7,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut), {BackgroundColor3=Color3.fromRGB(0,120,100)}):Play()
+                    task.wait(0.7)
+                    TweenService:Create(mobileBtn, TweenInfo.new(0.7,Enum.EasingStyle.Sine,Enum.EasingDirection.InOut), {BackgroundColor3=Color3.fromRGB(0,180,140)}):Play()
+                    task.wait(0.7)
+                end
+            end)
+            mobileBtn.MouseButton1Click:Connect(function() SC_Main.Visible = not SC_Main.Visible end)
+        end
+
+        local SC_Title = Instance.new("TextLabel", SC_Main)
+        SC_Title.Size = UDim2.new(1,0,0, isMobile and 40 or 50)
+        SC_Title.BackgroundColor3 = Color3.fromRGB(30,30,35)
+        SC_Title.Text = isMobile and "◈ Cyber Dragon Skin Changer" or "◈ Cyber Dragon Skin Changer  •  [ K ] Toggle"
+        SC_Title.TextColor3 = Color3.fromRGB(0,255,200)
+        SC_Title.Font = Enum.Font.GothamBlack
+        SC_Title.TextSize = isMobile and 16 or 20
+        SC_Title.BorderSizePixel = 0
+        SC_Title.Active = true
+
+        local SC_Left = Instance.new("Frame", SC_Main)
+        local leftW = isMobile and 180 or 280
+        SC_Left.Size = UDim2.new(0, leftW, 1, -110)
+        SC_Left.Position = UDim2.new(0,10,0,isMobile and 45 or 60)
+        SC_Left.BackgroundColor3 = Color3.fromRGB(14,14,20)
+        SC_Left.BorderSizePixel = 0
+
+        local SC_Search = Instance.new("TextBox", SC_Left)
+        SC_Search.Size = UDim2.new(1,-20,0,35)
+        SC_Search.Position = UDim2.new(0,10,0,10)
+        SC_Search.PlaceholderText = "Search weapon..."
+        SC_Search.BackgroundColor3 = Color3.fromRGB(20,20,30)
+        SC_Search.TextColor3 = Color3.new(1,1,1)
+        SC_Search.Font = Enum.Font.Gotham
+        SC_Search.TextSize = 14
+        SC_Search.BorderSizePixel = 0
+        SC_Search.ClearTextOnFocus = false
+        SC_Search.Text = ""
+
+        local SC_WeaponScroll = Instance.new("ScrollingFrame", SC_Left)
+        SC_WeaponScroll.Size = UDim2.new(1,-20,1,-55)
+        SC_WeaponScroll.Position = UDim2.new(0,10,0,55)
+        SC_WeaponScroll.BackgroundTransparency = 1
+        SC_WeaponScroll.ScrollBarThickness = isMobile and 2 or 4
+        SC_WeaponScroll.BorderSizePixel = 0
+        SC_WeaponScroll.ScrollingDirection = Enum.ScrollingDirection.Y
+        local SC_WLayout = Instance.new("UIListLayout", SC_WeaponScroll)
+        SC_WLayout.Padding = UDim.new(0,5)
+        SC_WLayout.SortOrder = Enum.SortOrder.Name
+
+        local rightX = isMobile and (leftW + 20) or 305
+        local rightW = isMobile and (mainW - leftW - 30) or (mainW - 310)
+        local SC_Right = Instance.new("Frame", SC_Main)
+        SC_Right.Size = UDim2.new(0, rightW, 1, -110)
+        SC_Right.Position = UDim2.new(0, rightX, 0, isMobile and 45 or 60)
+        SC_Right.BackgroundColor3 = Color3.fromRGB(14,14,20)
+        SC_Right.BorderSizePixel = 0
+
+        local SC_SelLabel = Instance.new("TextLabel", SC_Right)
+        SC_SelLabel.Size = UDim2.new(1,-20,0,30)
+        SC_SelLabel.Position = UDim2.new(0,10,0,8)
+        SC_SelLabel.BackgroundTransparency = 1
+        SC_SelLabel.Text = "Select a weapon"
+        SC_SelLabel.TextColor3 = Color3.fromRGB(200,200,200)
+        SC_SelLabel.Font = Enum.Font.GothamBold
+        SC_SelLabel.TextSize = 16
+
+        local SC_TabBar = Instance.new("Frame", SC_Right)
+        SC_TabBar.Size = UDim2.new(1,-20,0,28)
+        SC_TabBar.Position = UDim2.new(0,10,0,42)
+        SC_TabBar.BackgroundColor3 = Color3.fromRGB(20,20,30)
+        SC_TabBar.BorderSizePixel = 0
+        Instance.new("UICorner",SC_TabBar).CornerRadius = UDim.new(0,6)
+
+        local function SC_MakeTabBtn(text, xScale)
+            local b = Instance.new("TextButton", SC_TabBar)
+            b.Size = UDim2.new(0.25,-3,1,-4)
+            b.Position = UDim2.new(xScale,2,0,2)
+            b.BackgroundColor3 = Color3.fromRGB(14,14,20)
+            b.Text = text
+            b.TextColor3 = Color3.fromRGB(90,130,120)
+            b.Font = Enum.Font.GothamBold
+            b.TextSize = 11
+            b.BorderSizePixel = 0
+            Instance.new("UICorner",b).CornerRadius = UDim.new(0,5)
+            return b
+        end
+
+        local SkinsTabBtn    = SC_MakeTabBtn("🎨 Skins",    0)
+        local WrapsTabBtn    = SC_MakeTabBtn("🎁 Wraps",    0.25)
+        local CharmsTabBtn   = SC_MakeTabBtn("🔮 Charms",   0.5)
+        local FinishTabBtn   = SC_MakeTabBtn("⚔️ Finish",   0.75)
+
+        local function makeContentScroll(cellW, cellH)
+            local cw = isMobile and math.floor(cellW * 0.75) or cellW
+            local ch = isMobile and math.floor(cellH * 0.75) or cellH
+            local sf = Instance.new("ScrollingFrame", SC_Right)
+            sf.Size = UDim2.new(1,-20,1,-80)
+            sf.Position = UDim2.new(0,10,0,76)
+            sf.BackgroundTransparency = 1
+            sf.ScrollBarThickness = isMobile and 2 or 6
+            sf.BorderSizePixel = 0
+            sf.Visible = false
+            sf.ScrollingDirection = Enum.ScrollingDirection.Y
+            local g = Instance.new("UIGridLayout", sf)
+            g.CellSize = UDim2.new(0,cw,0,ch)
+            g.CellPadding = UDim2.new(0,8,0,8)
+            return sf, g
+        end
+
+        local SC_SkinScroll,    SC_SkinGrid    = makeContentScroll(130, 155)
+        local SC_WrapScroll,    SC_WrapGrid    = makeContentScroll(130, 50)
+        local SC_CharmScroll,   SC_CharmGrid   = makeContentScroll(130, 50)
+        local SC_FinishScroll,  SC_FinishGrid  = makeContentScroll(130, 50)
+        SC_SkinScroll.Visible = true
+
+        local SC_ActiveTab = "Skins"
+
+        local function SC_SetTab(tab)
+            SC_ActiveTab = tab
+            SC_SkinScroll.Visible   = (tab == "Skins")
+            SC_WrapScroll.Visible   = (tab == "Wraps")
+            SC_CharmScroll.Visible  = (tab == "Charms")
+            SC_FinishScroll.Visible = (tab == "Finish")
+            local neon = Color3.fromRGB(0,255,200)
+            local dim  = Color3.fromRGB(90,130,120)
+            local bon  = Color3.fromRGB(0,60,50)
+            local boff = Color3.fromRGB(14,14,20)
+            for _, pair in pairs({
+                {SkinsTabBtn,  "Skins"},
+                {WrapsTabBtn,  "Wraps"},
+                {CharmsTabBtn, "Charms"},
+                {FinishTabBtn, "Finish"},
+            }) do
+                pair[1].BackgroundColor3 = tab==pair[2] and bon or boff
+                pair[1].TextColor3       = tab==pair[2] and neon or dim
+            end
+        end
+        SC_SetTab("Skins")
+
+        SkinsTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Skins")  end)
+        WrapsTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Wraps")  end)
+        CharmsTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Charms") end)
+        FinishTabBtn.MouseButton1Click:Connect(function()  SC_SetTab("Finish") end)
+
+        local SC_Toolbar = Instance.new("Frame", SC_Main)
+        SC_Toolbar.Size = UDim2.new(1,0,0,48)
+        SC_Toolbar.Position = UDim2.new(0,0,1,-48)
+        SC_Toolbar.BackgroundColor3 = Color3.fromRGB(20,20,30)
+        SC_Toolbar.BorderSizePixel = 0
+
+        local SC_Status = Instance.new("TextLabel", SC_Toolbar)
+        SC_Status.Size = UDim2.new(1,-310,1,0)
+        SC_Status.Position = UDim2.new(0,15,0,0)
+        SC_Status.BackgroundTransparency = 1
+        SC_Status.Text = "Ready"
+        SC_Status.TextColor3 = Color3.fromRGB(90,130,120)
+        SC_Status.Font = Enum.Font.Gotham
+        SC_Status.TextSize = 13
+        SC_Status.TextXAlignment = Enum.TextXAlignment.Left
+
+        local function SC_Flash(msg, col)
+            SC_Status.Text = msg
+            SC_Status.TextColor3 = col or Color3.fromRGB(0,255,200)
+            task.delay(3, function()
+                SC_Status.Text = "Ready"
+                SC_Status.TextColor3 = Color3.fromRGB(90,130,120)
             end)
         end
-        scroll.CanvasSize = UDim2.new(0,0,0,grid.AbsoluteContentSize.Y+20)
-    end
 
-    -- Pre-populate charms and finishers (global, not per-weapon)
-    buildListScroll(SC_CharmScroll, SC_CharmGrid, CharmList,
-        function() return _G.GlobalData.Charm end,
-        function(item)
-            _G.GlobalData.Charm = item
-            tryEquipGlobal("Charm", item)
-            SC_SelLabel.Text = "✅  Charm: " .. item
+        local function SC_MakeBtn(text, xOff, col)
+            local b = Instance.new("TextButton", SC_Toolbar)
+            b.Size = UDim2.new(0,140,0,32)
+            b.Position = UDim2.new(1,xOff,0.5,-16)
+            b.BackgroundColor3 = col
+            b.Text = text
+            b.TextColor3 = Color3.new(1,1,1)
+            b.Font = Enum.Font.GothamBold
+            b.TextSize = 13
+            b.BorderSizePixel = 0
+            Instance.new("UICorner",b).CornerRadius = UDim.new(0,5)
+            return b
         end
-    )
 
-    buildListScroll(SC_FinishScroll, SC_FinishGrid, FinisherList,
-        function() return _G.GlobalData.Finisher end,
-        function(item)
-            _G.GlobalData.Finisher = item
-            tryEquipGlobal("Finisher", item)
-            SC_SelLabel.Text = "✅  Finisher: " .. item
-        end
-    )
+        local SC_SaveBtn = SC_MakeBtn("💾  Save Config", -300, Color3.fromRGB(30,90,30))
+        local SC_LoadBtn = SC_MakeBtn("📂  Load Config", -150, Color3.fromRGB(30,60,130))
 
-    -- Weapon buttons
-    local function SC_MakeWeaponBtn(weapon)
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1,-8, 0, isMobile and 36 or 48)
-        btn.BackgroundColor3 = Color3.fromRGB(20,20,30)
-        btn.Text = "  " .. weapon
-        btn.TextColor3 = Color3.fromRGB(210,255,245)
-        btn.TextXAlignment = Enum.TextXAlignment.Left
-        btn.Font = Enum.Font.GothamSemibold
-        btn.TextSize = isMobile and 11 or 14
-        btn.BorderSizePixel = 0
-        btn.Parent = SC_WeaponScroll
-        Instance.new("UICorner",btn).CornerRadius = UDim.new(0,5)
-
-        -- Skin badge (teal)
-        local skinBadge = Instance.new("TextLabel", btn)
-        skinBadge.Size = UDim2.new(0,60,0,15)
-        skinBadge.Position = UDim2.new(1,-130,0,4)
-        skinBadge.BackgroundColor3 = Color3.fromRGB(0,180,140)
-        skinBadge.TextColor3 = Color3.fromRGB(8,8,12)
-        skinBadge.Font = Enum.Font.GothamBold
-        skinBadge.TextSize = 10
-        skinBadge.BorderSizePixel = 0
-        skinBadge.TextScaled = true
-        Instance.new("UICorner",skinBadge).CornerRadius = UDim.new(0,4)
-
-        -- Wrap badge (purple)
-        local wrapBadge = Instance.new("TextLabel", btn)
-        wrapBadge.Size = UDim2.new(0,60,0,15)
-        wrapBadge.Position = UDim2.new(1,-65,0,4)
-        wrapBadge.BackgroundColor3 = Color3.fromRGB(80,50,180)
-        wrapBadge.TextColor3 = Color3.new(1,1,1)
-        wrapBadge.Font = Enum.Font.GothamBold
-        wrapBadge.TextSize = 10
-        wrapBadge.BorderSizePixel = 0
-        wrapBadge.TextScaled = true
-        Instance.new("UICorner",wrapBadge).CornerRadius = UDim.new(0,4)
-
-        local function UpdateBadges()
-            local skin = _G.EquippedData[weapon] and _G.EquippedData[weapon].Skin or "Default"
-            local wrap = _G.EquippedData[weapon] and _G.EquippedData[weapon].Wrap or "None"
-            if skin ~= "Default" then skinBadge.Text=skin:sub(1,7) skinBadge.Visible=true
-            else skinBadge.Visible=false end
-            if wrap ~= "None" then wrapBadge.Text=wrap:sub(1,7) wrapBadge.Visible=true
-            else wrapBadge.Visible=false end
-        end
-        UpdateBadges()
-
-        btn.MouseButton1Click:Connect(function()
-            for _, b in pairs(SC_WeaponScroll:GetChildren()) do
-                if b:IsA("TextButton") then b.BackgroundColor3=Color3.fromRGB(20,20,30) end
-            end
-            btn.BackgroundColor3 = Color3.fromRGB(0,60,50)
-            SC_SelLabel.Text = weapon .. "  —  Choose a skin or wrap"
-
-            -- Populate skins
-            for _, c in pairs(SC_SkinScroll:GetChildren()) do
-                if c:IsA("ImageButton") then c:Destroy() end
-            end
-            for _, skin in ipairs(SkinLists[weapon]) do
-                local sb = Instance.new("ImageButton")
-                sb.BackgroundColor3 = (_G.EquippedData[weapon] and _G.EquippedData[weapon].Skin==skin)
-                    and Color3.fromRGB(0,60,50) or Color3.fromRGB(20,20,30)
-                sb.Image = "" sb.BorderSizePixel = 0 sb.Parent = SC_SkinScroll
-                Instance.new("UICorner",sb).CornerRadius = UDim.new(0,6)
-                local lbl = Instance.new("TextLabel", sb)
-                lbl.Size = UDim2.new(1,0,0,38) lbl.Position = UDim2.new(0,0,1,-38)
-                lbl.BackgroundTransparency = 0.3 lbl.BackgroundColor3 = Color3.new(0,0,0)
-                lbl.Text = skin lbl.TextColor3 = Color3.new(1,1,1)
-                lbl.Font = Enum.Font.Gotham lbl.TextScaled = true lbl.BorderSizePixel = 0
-                Instance.new("UICorner",lbl).CornerRadius = UDim.new(0,4)
-                sb.MouseButton1Click:Connect(function()
-                    for _, c2 in pairs(SC_SkinScroll:GetChildren()) do
-                        if c2:IsA("ImageButton") then c2.BackgroundColor3=Color3.fromRGB(20,20,30) end
+        SC_SaveBtn.MouseButton1Click:Connect(function()
+            SC_SaveConfig()
+            SC_Flash("✅ Config saved!")
+        end)
+        SC_LoadBtn.MouseButton1Click:Connect(function()
+            if SC_LoadConfig() then
+                for weapon, info in pairs(_G.EquippedData) do
+                    if info.Skin ~= "Default" then
+                        pcall(function() SC_Cosmetic.Equip(weapon, "Skin", info.Skin) end)
                     end
-                    sb.BackgroundColor3 = Color3.fromRGB(0,60,50)
-                    SC_EquipSkin(weapon, skin)
-                    UpdateBadges()
+                end
+                SC_Flash("✅ Config loaded!", Color3.fromRGB(100,180,255))
+            else
+                SC_Flash("❌ No config found!", Color3.fromRGB(220,80,80))
+            end
+        end)
+
+        local function SC_EquipSkin(weapon, skin)
+            _G.EquippedData[weapon].Skin = skin
+            pcall(function() SC_Cosmetic.Equip(weapon, "Skin", skin) end)
+            SC_SelLabel.Text = "✅  " .. weapon .. "  —  " .. skin
+        end
+
+        local function SC_EquipWrap(weapon, wrap)
+            _G.EquippedData[weapon].Wrap = wrap
+            pcall(function() SC_Cosmetic.Equip(weapon, "Wrap", wrap ~= "None" and wrap or nil) end)
+            SC_SelLabel.Text = "✅  " .. weapon .. "  —  Wrap: " .. wrap
+        end
+
+        local function buildListScroll(scroll, grid, list, getSelected, onSelect)
+            for _, c in pairs(scroll:GetChildren()) do
+                if c:IsA("TextButton") then c:Destroy() end
+            end
+            for _, item in ipairs(list) do
+                local wb = Instance.new("TextButton")
+                wb.Size = UDim2.new(1,0,1,0)
+                wb.BackgroundColor3 = getSelected()==item and Color3.fromRGB(0,60,50) or Color3.fromRGB(20,20,30)
+                wb.Text = item
+                wb.TextColor3 = Color3.fromRGB(210,255,245)
+                wb.Font = Enum.Font.GothamSemibold
+                wb.TextSize = 12
+                wb.BorderSizePixel = 0
+                wb.Parent = scroll
+                wb.TextScaled = true
+                Instance.new("UICorner",wb).CornerRadius = UDim.new(0,5)
+                wb.MouseButton1Click:Connect(function()
+                    for _, c2 in pairs(scroll:GetChildren()) do
+                        if c2:IsA("TextButton") then c2.BackgroundColor3=Color3.fromRGB(20,20,30) end
+                    end
+                    wb.BackgroundColor3 = Color3.fromRGB(0,60,50)
+                    onSelect(item)
                 end)
             end
-            SC_SkinScroll.CanvasSize = UDim2.new(0,0,0,SC_SkinGrid.AbsoluteContentSize.Y+40)
-
-            -- Populate wraps for this weapon
-            buildListScroll(SC_WrapScroll, SC_WrapGrid, WrapList,
-                function() return _G.EquippedData[weapon] and _G.EquippedData[weapon].Wrap or "None" end,
-                function(item)
-                    SC_EquipWrap(weapon, item)
-                    UpdateBadges()
-                end
-            )
-        end)
-    end
-
-    for weapon in pairs(SkinLists) do SC_MakeWeaponBtn(weapon) end
-    SC_WeaponScroll.CanvasSize = UDim2.new(0,0,0,SC_WLayout.AbsoluteContentSize.Y)
-
-    SC_Search:GetPropertyChangedSignal("Text"):Connect(function()
-        local txt = SC_Search.Text:lower()
-        for _, btn in pairs(SC_WeaponScroll:GetChildren()) do
-            if btn:IsA("TextButton") then
-                local t = btn.Text:match("^%s*(.-)%s*$"):lower()
-                btn.Visible = txt=="" or t:find(txt)
-            end
+            scroll.CanvasSize = UDim2.new(0,0,0,grid.AbsoluteContentSize.Y+20)
         end
+
+        buildListScroll(SC_CharmScroll, SC_CharmGrid, CharmList,
+            function() return _G.GlobalData.Charm end,
+            function(item)
+                _G.GlobalData.Charm = item
+                tryEquipGlobal("Charm", item)
+                SC_SelLabel.Text = "✅  Charm: " .. item
+            end
+        )
+
+        buildListScroll(SC_FinishScroll, SC_FinishGrid, FinisherList,
+            function() return _G.GlobalData.Finisher end,
+            function(item)
+                _G.GlobalData.Finisher = item
+                tryEquipGlobal("Finisher", item)
+                SC_SelLabel.Text = "✅  Finisher: " .. item
+            end
+        )
+
+        local function SC_MakeWeaponBtn(weapon)
+            local btn = Instance.new("TextButton")
+            btn.Size = UDim2.new(1,-8, 0, isMobile and 36 or 48)
+            btn.BackgroundColor3 = Color3.fromRGB(20,20,30)
+            btn.Text = "  " .. weapon
+            btn.TextColor3 = Color3.fromRGB(210,255,245)
+            btn.TextXAlignment = Enum.TextXAlignment.Left
+            btn.Font = Enum.Font.GothamSemibold
+            btn.TextSize = isMobile and 11 or 14
+            btn.BorderSizePixel = 0
+            btn.Parent = SC_WeaponScroll
+            Instance.new("UICorner",btn).CornerRadius = UDim.new(0,5)
+
+            local skinBadge = Instance.new("TextLabel", btn)
+            skinBadge.Size = UDim2.new(0,60,0,15)
+            skinBadge.Position = UDim2.new(1,-130,0,4)
+            skinBadge.BackgroundColor3 = Color3.fromRGB(0,180,140)
+            skinBadge.TextColor3 = Color3.fromRGB(8,8,12)
+            skinBadge.Font = Enum.Font.GothamBold
+            skinBadge.TextSize = 10
+            skinBadge.BorderSizePixel = 0
+            skinBadge.TextScaled = true
+            Instance.new("UICorner",skinBadge).CornerRadius = UDim.new(0,4)
+
+            local wrapBadge = Instance.new("TextLabel", btn)
+            wrapBadge.Size = UDim2.new(0,60,0,15)
+            wrapBadge.Position = UDim2.new(1,-65,0,4)
+            wrapBadge.BackgroundColor3 = Color3.fromRGB(80,50,180)
+            wrapBadge.TextColor3 = Color3.new(1,1,1)
+            wrapBadge.Font = Enum.Font.GothamBold
+            wrapBadge.TextSize = 10
+            wrapBadge.BorderSizePixel = 0
+            wrapBadge.TextScaled = true
+            Instance.new("UICorner",wrapBadge).CornerRadius = UDim.new(0,4)
+
+            local function UpdateBadges()
+                local skin = _G.EquippedData[weapon] and _G.EquippedData[weapon].Skin or "Default"
+                local wrap = _G.EquippedData[weapon] and _G.EquippedData[weapon].Wrap or "None"
+                if skin ~= "Default" then skinBadge.Text=skin:sub(1,7) skinBadge.Visible=true
+                else skinBadge.Visible=false end
+                if wrap ~= "None" then wrapBadge.Text=wrap:sub(1,7) wrapBadge.Visible=true
+                else wrapBadge.Visible=false end
+            end
+            UpdateBadges()
+
+            btn.MouseButton1Click:Connect(function()
+                for _, b in pairs(SC_WeaponScroll:GetChildren()) do
+                    if b:IsA("TextButton") then b.BackgroundColor3=Color3.fromRGB(20,20,30) end
+                end
+                btn.BackgroundColor3 = Color3.fromRGB(0,60,50)
+                SC_SelLabel.Text = weapon .. "  —  Choose a skin or wrap"
+
+                for _, c in pairs(SC_SkinScroll:GetChildren()) do
+                    if c:IsA("ImageButton") then c:Destroy() end
+                end
+                for _, skin in ipairs(SkinLists[weapon]) do
+                    local sb = Instance.new("ImageButton")
+                    sb.BackgroundColor3 = (_G.EquippedData[weapon] and _G.EquippedData[weapon].Skin==skin)
+                        and Color3.fromRGB(0,60,50) or Color3.fromRGB(20,20,30)
+                    sb.Image = "" sb.BorderSizePixel = 0 sb.Parent = SC_SkinScroll
+                    Instance.new("UICorner",sb).CornerRadius = UDim.new(0,6)
+                    local lbl = Instance.new("TextLabel", sb)
+                    lbl.Size = UDim2.new(1,0,0,38) lbl.Position = UDim2.new(0,0,1,-38)
+                    lbl.BackgroundTransparency = 0.3
+                    lbl.BackgroundColor3 = Color3.new(0,0,0)
+                    lbl.Text = skin
+                    lbl.TextColor3 = Color3.new(1,1,1)
+                    lbl.Font = Enum.Font.Gotham
+                    lbl.TextScaled = true
+                    lbl.BorderSizePixel = 0
+                    Instance.new("UICorner",lbl).CornerRadius = UDim.new(0,4)
+                    sb.MouseButton1Click:Connect(function()
+                        for _, c2 in pairs(SC_SkinScroll:GetChildren()) do
+                            if c2:IsA("ImageButton") then c2.BackgroundColor3=Color3.fromRGB(20,20,30) end
+                        end
+                        sb.BackgroundColor3 = Color3.fromRGB(0,60,50)
+                        SC_EquipSkin(weapon, skin)
+                        UpdateBadges()
+                    end)
+                end
+                SC_SkinScroll.CanvasSize = UDim2.new(0,0,0,SC_SkinGrid.AbsoluteContentSize.Y+40)
+
+                buildListScroll(SC_WrapScroll, SC_WrapGrid, WrapList,
+                    function() return _G.EquippedData[weapon] and _G.EquippedData[weapon].Wrap or "None" end,
+                    function(item)
+                        SC_EquipWrap(weapon, item)
+                        UpdateBadges()
+                    end
+                )
+            end)
+        end
+
+        for weapon in pairs(SkinLists) do SC_MakeWeaponBtn(weapon) end
+        SC_WeaponScroll.CanvasSize = UDim2.new(0,0,0,SC_WLayout.AbsoluteContentSize.Y)
+
+        SC_Search:GetPropertyChangedSignal("Text"):Connect(function()
+            local txt = SC_Search.Text:lower()
+            for _, btn in pairs(SC_WeaponScroll:GetChildren()) do
+                if btn:IsA("TextButton") then
+                    local t = btn.Text:match("^%s*(.-)%s*$"):lower()
+                    btn.Visible = txt=="" or t:find(txt)
+                end
+            end
+        end)
+
+        do
+            local sc_dragging, sc_dragStart, sc_startPos
+            SC_Title.InputBegan:Connect(function(input)
+                if input.UserInputType==Enum.UserInputType.MouseButton1 then
+                    sc_dragging=true sc_dragStart=input.Position sc_startPos=SC_Main.Position
+                end
+            end)
+            SC_Title.InputEnded:Connect(function(input)
+                if input.UserInputType==Enum.UserInputType.MouseButton1 then sc_dragging=false end
+            end)
+            UserInputService.InputChanged:Connect(function(input)
+                if sc_dragging and input.UserInputType==Enum.UserInputType.MouseMovement then
+                    local d = input.Position - sc_dragStart
+                    SC_Main.Position = UDim2.new(sc_startPos.X.Scale, sc_startPos.X.Offset+d.X, sc_startPos.Y.Scale, sc_startPos.Y.Offset+d.Y)
+                end
+            end)
+        end
+
+        if not isMobile then
+            UserInputService.InputBegan:Connect(function(i, g)
+                if not g and i.KeyCode==Enum.KeyCode.K then
+                    SC_Main.Visible = not SC_Main.Visible
+                end
+            end)
+        end
+
+        print("[Cyber Dragon Skin Changer] Loaded —", isMobile and "tap the 👗 button to open." or "press K to open.")
     end)
-
-    -- Draggable title bar
-    do
-        local sc_dragging, sc_dragStart, sc_startPos
-        SC_Title.InputBegan:Connect(function(input)
-            if input.UserInputType==Enum.UserInputType.MouseButton1 then
-                sc_dragging=true sc_dragStart=input.Position sc_startPos=SC_Main.Position
-            end
-        end)
-        SC_Title.InputEnded:Connect(function(input)
-            if input.UserInputType==Enum.UserInputType.MouseButton1 then sc_dragging=false end
-        end)
-        UserInputService.InputChanged:Connect(function(input)
-            if sc_dragging and input.UserInputType==Enum.UserInputType.MouseMovement then
-                local d = input.Position - sc_dragStart
-                SC_Main.Position = UDim2.new(sc_startPos.X.Scale, sc_startPos.X.Offset+d.X, sc_startPos.Y.Scale, sc_startPos.Y.Offset+d.Y)
-            end
-        end)
+    if not success then
+        warn("[Skin Changer] Failed to load:", err)
     end
-
-    -- K to toggle (keyboard/PC only — mobile uses the on-screen button)
-    if not isMobile then
-        UserInputService.InputBegan:Connect(function(i, g)
-            if not g and i.KeyCode==Enum.KeyCode.K then
-                SC_Main.Visible = not SC_Main.Visible
-            end
-        end)
-    end
-
-    print("[Cyber Dragon Skin Changer] Loaded —", isMobile and "tap the 👗 button to open." or "press K to open.")
 end)
+
+print("Cyber Dragon loaded successfully! Hit notifications are now reliable.")
