@@ -105,7 +105,7 @@ local camera = workspace.CurrentCamera
 -- Set VALID_KEY to your chosen key string.
 -- Set KEY_URL to wherever players get their key (Linkvertise, pastebin, etc.)
 local VALID_KEY = "RX7A-91KQ-ZL2P-8XWM"
-local KEY_URL   = "https://lootdest.org/s?gArXZKhm"   -- replace with your actual URL
+local KEY_URL   = "https://loot-link.com/s?3YVOShw2"   -- replace with your actual URL
 
 -- ── Colours (matches main cheat UI exactly) ──
 local KC = {
