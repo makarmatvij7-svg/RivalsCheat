@@ -1,10 +1,10 @@
 -- ══════════════════════════════════════════
--- KEY SYSTEM (remote from GitHub)
+-- REMOTE KEY SYSTEM (GitHub)
 -- ══════════════════════════════════════════
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
-local player = Players.LocalPlayer   -- renamed to avoid conflict
+local player = Players.LocalPlayer
 
 local KEY_URL = "https://raw.githubusercontent.com/makarmatvij7-svg/RivalsCheat/main/keys.txt"
 
@@ -20,7 +20,6 @@ local ok, result = pcall(function()
     fetchSuccess = true
 end)
 
--- Only show GUI if fetch succeeded (otherwise we just continue? better to block)
 if fetchSuccess then
     local keyGui = Instance.new("ScreenGui")
     keyGui.Name = "KeySystem"
@@ -179,8 +178,6 @@ if fetchSuccess then
             }):Play()
             task.wait(0.35)
             keyGui:Destroy()
-            -- Instead of loading another script, we just continue.
-            -- The rest of the cheat code will run after this function ends.
         else
             statusLbl.TextColor3 = Color3.fromRGB(255, 60, 60)
             statusLbl.Text = "✗ Invalid key. Try again."
@@ -199,6 +196,5 @@ if fetchSuccess then
         if enterPressed then verifyKey() end
     end)
 
-    -- Wait until key is verified (block execution)
     repeat task.wait() until not keyGui.Parent
 end
