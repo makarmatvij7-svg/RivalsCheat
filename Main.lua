@@ -75,7 +75,7 @@ local function checkExecutor()
         task.wait(4)
         game:GetService("Players").LocalPlayer:Kick(
             "Unsupported executor. Missing: " .. table.concat(missing, ", ")
-            .. " — Use Solara, Delta, Wave, Synapse X, KRNL, Fluxus, Codex, or Madium."
+            .. " — Use Solara, Delta, Wave, Synapse X, KRNL, Velocity, Yub-x, or Madium."
         )
         return false
     end
