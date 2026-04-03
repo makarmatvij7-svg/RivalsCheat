@@ -28,7 +28,7 @@ local function checkExecutor()
     if #missing > 0 then
         table.sort(missing)
         local msg = "❌ Unsupported Executor!\n\nMissing required APIs:\n• " .. table.concat(missing, "\n• ") ..
-            "\n\nSupported executors:\nSolara, Delta, Wave, Synapse X,\nKRNL, Velocity, Yub-x, Madium"
+            "\n\nSupported executors:\nSolara, Delta, Wave, Synapse X,\nXeno, Velocity, YuB-X, Madium"
         local sg = Instance.new("ScreenGui")
         sg.ResetOnSpawn = false
         sg.Name = "UnsupportedExecutor"
@@ -54,7 +54,7 @@ local function checkExecutor()
         lbl.TextWrapped = true
         task.wait(4)
         game:GetService("Players").LocalPlayer:Kick("Unsupported executor. Missing: " .. table.concat(missing, ", ") ..
-            " — Use Solara, Delta, Wave, Synapse X, KRNL, Fluxus, Codex, or Madium.")
+            " — Use Solara, Delta, Wave, Synapse X, Xeno, Velocity, YuB-X, or Madium.")
         return false
     end
     return true
