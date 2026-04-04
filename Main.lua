@@ -78,8 +78,8 @@ local camera = workspace.CurrentCamera
 -- KEY SYSTEM
 -- ══════════════════════════════════════════
 
-local VALID_KEY = "RX7A-91KQ-ZL2P-8XWM"
-local KEY_URL   = "https://link-target.net/3311972/9bTwBCLEq41P"
+local VALID_KEY = "CyberDragonOnTop"
+local KEY_URL   = "https://linkvertise.com/3311972/9bTwBCLEq41P?o=sharing"
 
 local KC = {
     bg     = Color3.fromRGB(8,   8,   12),
