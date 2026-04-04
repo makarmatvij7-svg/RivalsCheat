@@ -78,7 +78,7 @@ local camera = workspace.CurrentCamera
 -- KEY SYSTEM
 -- ══════════════════════════════════════════
 
-local VALID_KEY = "CyberDragonOnTop"
+local VALID_KEY = "RX7A-91KQ-ZL2P-8XWM"
 local KEY_URL   = "https://link-target.net/3311972/9bTwBCLEq41P"
 
 local KC = {
@@ -1126,6 +1126,232 @@ RunService.Heartbeat:Connect(function()
         end
     end
 end)
+
+-- ══════════════════════════════════════════
+-- HIT NOTIFICATION (NEON MAGENTA, REDUCED WAVY MOTION)
+-- ══════════════════════════════════════════
+
+-- Hit Marker GUI (crosshair flash)
+local hitMarkerGui = Instance.new("ScreenGui")
+hitMarkerGui.Name = "HitMarker"
+hitMarkerGui.ResetOnSpawn = false
+hitMarkerGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+hitMarkerGui.Parent = plr:WaitForChild("PlayerGui")
+
+-- Main hit marker (crosshair)
+local hitMarker = Instance.new("Frame", hitMarkerGui)
+hitMarker.Size = UDim2.new(0, 40, 0, 40)
+hitMarker.Position = UDim2.new(0.5, -20, 0.5, -20)
+hitMarker.BackgroundTransparency = 1
+hitMarker.BorderSizePixel = 0
+hitMarker.Visible = false
+hitMarker.ZIndex = 999
+
+local lineLength = 12
+local lineThick = 3
+local colors = {Color3.fromRGB(255, 255, 255), Color3.fromRGB(255, 100, 100)}
+
+for i = 1, 2 do
+    local top = Instance.new("Frame", hitMarker)
+    top.Size = UDim2.new(0, lineThick, 0, lineLength)
+    top.Position = UDim2.new(0.5, -lineThick/2, 0, -lineLength)
+    top.BackgroundColor3 = colors[i]
+    top.BorderSizePixel = 0
+
+    local bottom = Instance.new("Frame", hitMarker)
+    bottom.Size = UDim2.new(0, lineThick, 0, lineLength)
+    bottom.Position = UDim2.new(0.5, -lineThick/2, 1, 0)
+    bottom.BackgroundColor3 = colors[i]
+    bottom.BorderSizePixel = 0
+
+    local left = Instance.new("Frame", hitMarker)
+    left.Size = UDim2.new(0, lineLength, 0, lineThick)
+    left.Position = UDim2.new(0, -lineLength, 0.5, -lineThick/2)
+    left.BackgroundColor3 = colors[i]
+    left.BorderSizePixel = 0
+
+    local right = Instance.new("Frame", hitMarker)
+    right.Size = UDim2.new(0, lineLength, 0, lineThick)
+    right.Position = UDim2.new(1, 0, 0.5, -lineThick/2)
+    right.BackgroundColor3 = colors[i]
+    right.BorderSizePixel = 0
+end
+
+-- Radial pulse effect
+local pulse = Instance.new("Frame", hitMarkerGui)
+pulse.Size = UDim2.new(0, 0, 0, 0)
+pulse.Position = UDim2.new(0.5, 0, 0.5, 0)
+pulse.AnchorPoint = Vector2.new(0.5, 0.5)
+pulse.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
+pulse.BorderSizePixel = 0
+pulse.BackgroundTransparency = 1
+pulse.Visible = false
+pulse.ZIndex = 998
+Instance.new("UICorner", pulse).CornerRadius = UDim.new(1, 0)
+
+local function showHitMarker()
+    -- Flash the crosshair
+    hitMarker.Visible = true
+    hitMarker.BackgroundTransparency = 0
+    TweenService:Create(hitMarker, TweenInfo.new(0.08, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 1
+    }):Play()
+    task.delay(0.12, function()
+        if hitMarker then hitMarker.Visible = false end
+    end)
+
+    -- Radial pulse animation
+    pulse.Visible = true
+    pulse.Size = UDim2.new(0, 0, 0, 0)
+    pulse.BackgroundTransparency = 0.7
+    TweenService:Create(pulse, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 120, 0, 120),
+        BackgroundTransparency = 1
+    }):Play()
+    task.delay(0.2, function()
+        if pulse then pulse.Visible = false end
+    end)
+end
+
+-- Floating Damage Numbers (neon magenta, reduced wavy motion)
+local DAMAGE_LIFESPAN = 1.0
+local DAMAGE_RISE_SPEED = 40
+local DAMAGE_WAVE_AMPLITUDE = 12   -- reduced from 30 to make movement subtle
+local DAMAGE_WAVE_FREQUENCY = 3    -- number of full waves during lifespan
+
+local function showDamageNumber(enemyChar, damage, isHeadshot)
+    if not enemyChar or not enemyChar.Parent then return end
+    local head = enemyChar:FindFirstChild("Head")
+    if not head then return end
+
+    local billboard = Instance.new("BillboardGui")
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.AlwaysOnTop = true
+    billboard.LightInfluence = 0
+    billboard.Parent = head
+
+    local label = Instance.new("TextLabel", billboard)
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = "-" .. math.floor(damage)
+    -- Neon magenta / hot pink color
+    label.TextColor3 = isHeadshot and Color3.fromRGB(255, 100, 255) or Color3.fromRGB(255, 0, 255)
+    label.TextStrokeTransparency = 0.3
+    label.TextStrokeColor3 = Color3.fromRGB(255, 255, 255)  -- white outline for glow
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 24
+    label.TextScaled = true
+
+    local startPosY = billboard.StudsOffset.Y
+    local startTime = tick()
+    local connection
+    connection = RunService.RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        if elapsed >= DAMAGE_LIFESPAN then
+            connection:Disconnect()
+            billboard:Destroy()
+            return
+        end
+        local t = elapsed / DAMAGE_LIFESPAN
+        -- Rise upward
+        local newY = startPosY + DAMAGE_RISE_SPEED * elapsed
+        -- Wavy side-to-side motion (reduced amplitude)
+        local angle = 2 * math.pi * DAMAGE_WAVE_FREQUENCY * t
+        local offsetX = math.sin(angle) * DAMAGE_WAVE_AMPLITUDE * (1 - t)  -- amplitude reduces as it fades
+        billboard.StudsOffset = Vector3.new(offsetX, newY, 0)
+        -- Fade out
+        label.TextTransparency = t
+        label.TextStrokeTransparency = 0.3 + t * 0.7
+    end)
+end
+
+-- Shot detection (left click / mobile tap)
+local lastShotTime = 0
+local SHOT_WINDOW = 0.12
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        lastShotTime = tick()
+    end
+end)
+
+if UserInputService.TouchEnabled then
+    UserInputService.TouchTap:Connect(function()
+        lastShotTime = tick()
+    end)
+end
+
+local function isCurrentlyShooting()
+    return (tick() - lastShotTime) <= SHOT_WINDOW
+end
+
+-- Aiming check (wide angle, ~10 degrees)
+local function isAimingAtCharacter(char)
+    if not char then return false end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return false end
+    local camPos = camera.CFrame.Position
+    local look = camera.CFrame.LookVector
+    local toTarget = (hrp.Position - camPos).Unit
+    return look:Dot(toTarget) > 0.985
+end
+
+-- Headshot detection
+local function isHeadshot(enemyChar)
+    local head = enemyChar:FindFirstChild("Head")
+    if not head then return false end
+    local camPos = camera.CFrame.Position
+    local direction = (head.Position - camPos).Unit * 500
+    local ray = Ray.new(camPos, direction)
+    local hit = workspace:FindPartOnRay(ray, plr.Character)
+    return hit and hit:IsDescendantOf(enemyChar) and hit.Name == "Head"
+end
+
+-- Health tracking
+local lastHealth = {}
+local lastHitTime = {}
+
+local function monitorPlayer(player)
+    if player == plr then return end
+    local function onCharacterAdded(char)
+        task.wait(0.3)
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum then return end
+        lastHealth[player] = hum.Health
+        hum.HealthChanged:Connect(function(newHealth)
+            if not state.HitNotif then return end
+            local prev = lastHealth[player]
+            if prev and newHealth < prev then
+                local damage = prev - newHealth
+                if damage < 1 then return end
+                local nowTime = tick()
+                if isCurrentlyShooting() and isAimingAtCharacter(char) then
+                    if not lastHitTime[player] or (nowTime - lastHitTime[player]) > 0.05 then
+                        lastHitTime[player] = nowTime
+                        local hs = isHeadshot(char)
+                        showHitMarker()
+                        showDamageNumber(char, damage, hs)
+                    end
+                end
+            end
+            lastHealth[player] = newHealth
+        end)
+    end
+    player.CharacterAdded:Connect(onCharacterAdded)
+    if player.Character then onCharacterAdded(player.Character) end
+end
+
+for _, p in pairs(Players:GetPlayers()) do monitorPlayer(p) end
+Players.PlayerAdded:Connect(monitorPlayer)
+Players.PlayerRemoving:Connect(function(p)
+    lastHealth[p] = nil
+    lastHitTime[p] = nil
+end)
+
+-- Clean up old side notification GUI if it exists (from previous version)
+if hitNotifGui then hitNotifGui:Destroy() end
 
 -- ══════════════════════════════════════════
 -- UI Colors
@@ -2340,4 +2566,4 @@ task.spawn(function()
     end
 end)
 
-print("Cyber Dragon loaded successfully! Hit notifications are now reliable.")
+print("Cyber Dragon loaded successfully! Hit notifications now have reduced wavy motion and neon magenta color.")
