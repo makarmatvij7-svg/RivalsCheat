@@ -78,7 +78,7 @@ local camera = workspace.CurrentCamera
 -- KEY SYSTEM
 -- ══════════════════════════════════════════
 
-local VALID_KEY = "CyberDragonOnTop"
+local VALID_KEY = "ACCESS-89JK-PL20"
 local KEY_URL   = "https://loot-link.com/s?3YVOShw2"
 
 local KC = {
