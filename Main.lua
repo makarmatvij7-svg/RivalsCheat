@@ -74,7 +74,309 @@ local HttpService = game:GetService("HttpService")
 local plr = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
+-- ══════════════════════════════════════════
+-- KEY SYSTEM
+-- ══════════════════════════════════════════
 
+local VALID_KEY = "ACCESS-89JK-PL20"
+local KEY_URL   = "https://loot-link.com/s?3YVOShw2"
+
+local KC = {
+    bg     = Color3.fromRGB(8,   8,   12),
+    bg2    = Color3.fromRGB(14,  14,  20),
+    bg3    = Color3.fromRGB(20,  20,  30),
+    neon   = Color3.fromRGB(0,   255, 200),
+    neon2  = Color3.fromRGB(0,   180, 140),
+    border = Color3.fromRGB(30,  60,  50),
+    text   = Color3.fromRGB(210, 255, 245),
+    dim    = Color3.fromRGB(90,  130, 120),
+    red    = Color3.fromRGB(255, 70,  70),
+    green  = Color3.fromRGB(0,   255, 120),
+}
+
+local keyVerified = false
+
+do
+    local kGui = Instance.new("ScreenGui")
+    kGui.Name = "CyberDragonKey"
+    kGui.ResetOnSpawn = false
+    kGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    kGui.DisplayOrder = 999
+    kGui.Parent = plr:WaitForChild("PlayerGui")
+
+    local backdrop = Instance.new("Frame", kGui)
+    backdrop.Size = UDim2.new(1, 0, 1, 0)
+    backdrop.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    backdrop.BackgroundTransparency = 0.45
+    backdrop.BorderSizePixel = 0
+    backdrop.ZIndex = 1
+
+    local win = Instance.new("Frame", kGui)
+    win.Size = UDim2.new(0, 440, 0, 320)
+    win.Position = UDim2.new(0.5, -220, 0.5, -160)
+    win.BackgroundColor3 = KC.bg
+    win.BorderSizePixel = 0
+    win.ZIndex = 2
+    win.BackgroundTransparency = 1
+    Instance.new("UICorner", win).CornerRadius = UDim.new(0, 8)
+    local winStroke = Instance.new("UIStroke", win)
+    winStroke.Color = KC.neon
+    winStroke.Thickness = 1.5
+    winStroke.Transparency = 1
+
+    local titleBar = Instance.new("Frame", win)
+    titleBar.Size = UDim2.new(1, 0, 0, 38)
+    titleBar.BackgroundColor3 = KC.bg2
+    titleBar.BorderSizePixel = 0
+    titleBar.ZIndex = 3
+    Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 8)
+    local tbFix = Instance.new("Frame", titleBar)
+    tbFix.Size = UDim2.new(1, 0, 0.5, 0)
+    tbFix.Position = UDim2.new(0, 0, 0.5, 0)
+    tbFix.BackgroundColor3 = KC.bg2
+    tbFix.BorderSizePixel = 0
+    tbFix.ZIndex = 3
+
+    local accent = Instance.new("Frame", titleBar)
+    accent.Size = UDim2.new(0, 3, 1, -10)
+    accent.Position = UDim2.new(0, 8, 0, 5)
+    accent.BackgroundColor3 = KC.neon
+    accent.BorderSizePixel = 0
+    accent.ZIndex = 4
+    Instance.new("UICorner", accent).CornerRadius = UDim.new(1, 0)
+
+    local titleLbl = Instance.new("TextLabel", titleBar)
+    titleLbl.Size = UDim2.new(1, -20, 1, 0)
+    titleLbl.Position = UDim2.new(0, 18, 0, 0)
+    titleLbl.BackgroundTransparency = 1
+    titleLbl.Text = "◈ Cyber Dragon  •  Key System"
+    titleLbl.TextColor3 = KC.neon
+    titleLbl.TextSize = 12
+    titleLbl.Font = Enum.Font.GothamBold
+    titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+    titleLbl.ZIndex = 4
+
+    local iconLbl = Instance.new("TextLabel", win)
+    iconLbl.Size = UDim2.new(1, 0, 0, 40)
+    iconLbl.Position = UDim2.new(0, 0, 0, 48)
+    iconLbl.BackgroundTransparency = 1
+    iconLbl.Text = "🐉"
+    iconLbl.TextSize = 32
+    iconLbl.Font = Enum.Font.GothamBold
+    iconLbl.TextXAlignment = Enum.TextXAlignment.Center
+    iconLbl.ZIndex = 3
+
+    local headLbl = Instance.new("TextLabel", win)
+    headLbl.Size = UDim2.new(1, -40, 0, 22)
+    headLbl.Position = UDim2.new(0, 20, 0, 92)
+    headLbl.BackgroundTransparency = 1
+    headLbl.Text = "Enter your key to unlock Cyber Dragon"
+    headLbl.TextColor3 = KC.text
+    headLbl.TextSize = 13
+    headLbl.Font = Enum.Font.GothamBold
+    headLbl.TextXAlignment = Enum.TextXAlignment.Center
+    headLbl.ZIndex = 3
+
+    local subLbl = Instance.new("TextLabel", win)
+    subLbl.Size = UDim2.new(1, -40, 0, 18)
+    subLbl.Position = UDim2.new(0, 20, 0, 116)
+    subLbl.BackgroundTransparency = 1
+    subLbl.Text = "Don't have a key? Click 'Get Key' below."
+    subLbl.TextColor3 = KC.dim
+    subLbl.TextSize = 11
+    subLbl.Font = Enum.Font.Gotham
+    subLbl.TextXAlignment = Enum.TextXAlignment.Center
+    subLbl.ZIndex = 3
+
+    local inputFrame = Instance.new("Frame", win)
+    inputFrame.Size = UDim2.new(1, -40, 0, 36)
+    inputFrame.Position = UDim2.new(0, 20, 0, 146)
+    inputFrame.BackgroundColor3 = KC.bg2
+    inputFrame.BorderSizePixel = 0
+    inputFrame.ZIndex = 3
+    Instance.new("UICorner", inputFrame).CornerRadius = UDim.new(0, 6)
+    local inputStroke = Instance.new("UIStroke", inputFrame)
+    inputStroke.Color = KC.border
+    inputStroke.Thickness = 1
+
+    local keyIcon = Instance.new("TextLabel", inputFrame)
+    keyIcon.Size = UDim2.new(0, 28, 1, 0)
+    keyIcon.BackgroundTransparency = 1
+    keyIcon.Text = "🔑"
+    keyIcon.TextSize = 14
+    keyIcon.Font = Enum.Font.GothamBold
+    keyIcon.TextXAlignment = Enum.TextXAlignment.Center
+    keyIcon.ZIndex = 4
+
+    local keyInput = Instance.new("TextBox", inputFrame)
+    keyInput.Size = UDim2.new(1, -36, 1, 0)
+    keyInput.Position = UDim2.new(0, 28, 0, 0)
+    keyInput.BackgroundTransparency = 1
+    keyInput.Text = ""
+    keyInput.PlaceholderText = "Paste your key here..."
+    keyInput.PlaceholderColor3 = KC.dim
+    keyInput.TextColor3 = KC.text
+    keyInput.TextSize = 12
+    keyInput.Font = Enum.Font.Gotham
+    keyInput.TextXAlignment = Enum.TextXAlignment.Left
+    keyInput.ClearTextOnFocus = false
+    keyInput.ZIndex = 4
+
+    keyInput.Focused:Connect(function()
+        TweenService:Create(inputStroke, TweenInfo.new(0.15), {Color=KC.neon, Transparency=0}):Play()
+    end)
+    keyInput.FocusLost:Connect(function()
+        TweenService:Create(inputStroke, TweenInfo.new(0.15), {Color=KC.border, Transparency=0}):Play()
+    end)
+
+    local statusLbl = Instance.new("TextLabel", win)
+    statusLbl.Size = UDim2.new(1, -40, 0, 18)
+    statusLbl.Position = UDim2.new(0, 20, 0, 191)
+    statusLbl.BackgroundTransparency = 1
+    statusLbl.Text = ""
+    statusLbl.TextColor3 = KC.dim
+    statusLbl.TextSize = 11
+    statusLbl.Font = Enum.Font.GothamBold
+    statusLbl.TextXAlignment = Enum.TextXAlignment.Center
+    statusLbl.ZIndex = 3
+
+    local function setStatus(msg, col)
+        statusLbl.Text = msg
+        statusLbl.TextColor3 = col or KC.dim
+    end
+
+    local btnRow = Instance.new("Frame", win)
+    btnRow.Size = UDim2.new(1, -40, 0, 36)
+    btnRow.Position = UDim2.new(0, 20, 0, 218)
+    btnRow.BackgroundTransparency = 1
+    btnRow.ZIndex = 3
+
+    local function makeKeyBtn(parent, text, xScale, wScale, bg, hoverBg)
+        local btn = Instance.new("TextButton", parent)
+        btn.Size = UDim2.new(wScale, -4, 1, 0)
+        btn.Position = UDim2.new(xScale, 2, 0, 0)
+        btn.BackgroundColor3 = bg
+        btn.BorderSizePixel = 0
+        btn.Text = text
+        btn.TextColor3 = KC.text
+        btn.TextSize = 12
+        btn.Font = Enum.Font.GothamBold
+        btn.ZIndex = 4
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+        local bs = Instance.new("UIStroke", btn)
+        bs.Color = KC.neon bs.Thickness = 1 bs.Transparency = 0.6
+
+        btn.MouseEnter:Connect(function()
+            TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3=hoverBg}):Play()
+            TweenService:Create(bs, TweenInfo.new(0.12), {Transparency=0}):Play()
+        end)
+        btn.MouseLeave:Connect(function()
+            TweenService:Create(btn, TweenInfo.new(0.12), {BackgroundColor3=bg}):Play()
+            TweenService:Create(bs, TweenInfo.new(0.12), {Transparency=0.6}):Play()
+        end)
+        btn.MouseButton1Down:Connect(function()
+            TweenService:Create(btn, TweenInfo.new(0.08), {Size=UDim2.new(wScale,-6,1,-2)}):Play()
+        end)
+        btn.MouseButton1Up:Connect(function()
+            TweenService:Create(btn, TweenInfo.new(0.1, Enum.EasingStyle.Back), {Size=UDim2.new(wScale,-4,1,0)}):Play()
+        end)
+        return btn, bs
+    end
+
+    local getKeyBtn = makeKeyBtn(btnRow, "🔗  Get Key", 0, 0.45,
+        Color3.fromRGB(14,14,20), Color3.fromRGB(0,40,32))
+
+    local verifyBtn, verifyStroke = makeKeyBtn(btnRow, "✓  Verify Key", 0.45, 0.55,
+        Color3.fromRGB(0,30,22), Color3.fromRGB(0,55,42))
+    verifyStroke.Transparency = 0
+    verifyStroke.Color = KC.neon
+
+    local divLine = Instance.new("Frame", win)
+    divLine.Size = UDim2.new(1, -40, 0, 1)
+    divLine.Position = UDim2.new(0, 20, 0, 266)
+    divLine.BackgroundColor3 = KC.border
+    divLine.BorderSizePixel = 0
+    divLine.ZIndex = 3
+
+    local footerLbl = Instance.new("TextLabel", win)
+    footerLbl.Size = UDim2.new(1, -40, 0, 28)
+    footerLbl.Position = UDim2.new(0, 20, 0, 272)
+    footerLbl.BackgroundTransparency = 1
+    footerLbl.Text = "Key is reset every 24 hours  •  Never share your key"
+    footerLbl.TextColor3 = Color3.fromRGB(55, 80, 72)
+    footerLbl.TextSize = 10
+    footerLbl.Font = Enum.Font.Gotham
+    footerLbl.TextXAlignment = Enum.TextXAlignment.Center
+    footerLbl.ZIndex = 3
+
+    getKeyBtn.MouseButton1Click:Connect(function()
+        pcall(function() setclipboard(KEY_URL) end)
+        setStatus("🔗  Key URL copied to clipboard!", KC.neon2)
+        getKeyBtn.Text = "✓  Copied!"
+        task.delay(2.5, function()
+            getKeyBtn.Text = "🔗  Get Key"
+            setStatus("")
+        end)
+    end)
+
+    verifyBtn.MouseButton1Click:Connect(function()
+        local entered = keyInput.Text:gsub("%s+","")
+        if entered == "" then
+            setStatus("⚠  Please enter a key first.", KC.dim)
+            TweenService:Create(inputStroke, TweenInfo.new(0.1), {Color=KC.dim}):Play()
+            return
+        end
+
+        if entered == VALID_KEY then
+            setStatus("✅  Key accepted! Loading Cyber Dragon...", KC.green)
+            TweenService:Create(verifyBtn, TweenInfo.new(0.15), {BackgroundColor3=Color3.fromRGB(0,60,35)}):Play()
+            verifyBtn.Text = "✓  Accepted!"
+            verifyBtn.TextColor3 = KC.green
+            TweenService:Create(inputStroke, TweenInfo.new(0.15), {Color=KC.green}):Play()
+            TweenService:Create(winStroke, TweenInfo.new(0.3), {Color=KC.green}):Play()
+
+            task.delay(1.2, function()
+                TweenService:Create(win, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {BackgroundTransparency=1}):Play()
+                TweenService:Create(winStroke, TweenInfo.new(0.4), {Transparency=1}):Play()
+                TweenService:Create(backdrop, TweenInfo.new(0.4), {BackgroundTransparency=1}):Play()
+                task.delay(0.45, function()
+                    kGui:Destroy()
+                    keyVerified = true
+                end)
+            end)
+        else
+            setStatus("❌  Invalid key. Try again.", KC.red)
+            TweenService:Create(inputStroke, TweenInfo.new(0.1), {Color=KC.red}):Play()
+            local origPos = inputFrame.Position
+            local shakeAmts = {6, -5, 4, -3, 2, -1, 0}
+            task.spawn(function()
+                for _, amt in ipairs(shakeAmts) do
+                    inputFrame.Position = UDim2.new(origPos.X.Scale, origPos.X.Offset + amt, origPos.Y.Scale, origPos.Y.Offset)
+                    task.wait(0.04)
+                end
+                inputFrame.Position = origPos
+                TweenService:Create(inputStroke, TweenInfo.new(0.4), {Color=KC.border}):Play()
+                task.delay(2, function() setStatus("") end)
+            end)
+        end
+    end)
+
+    keyInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed then verifyBtn.MouseButton1Click:Fire() end
+    end)
+
+    task.spawn(function()
+        task.wait(0.05)
+        win.Position = UDim2.new(0.5, -220, 0.5, -180)
+        TweenService:Create(win, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            BackgroundTransparency = 0,
+            Position = UDim2.new(0.5, -220, 0.5, -160)
+        }):Play()
+        TweenService:Create(winStroke, TweenInfo.new(0.35), {Transparency=0}):Play()
+    end)
+
+    repeat task.wait(0.05) until keyVerified
+end
 
 -- ══════════════════════════════════════════
 -- State
