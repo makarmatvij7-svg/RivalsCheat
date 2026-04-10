@@ -79,7 +79,7 @@ local camera = workspace.CurrentCamera
 -- ══════════════════════════════════════════
 
 local VALID_KEY = "ACCESS-89JK-PL20"
-local KEY_URL   = "https://loot-link.com/s?3YVOShw2"
+local KEY_URL   = "https://earnpaste.com/paste/mnt9fcm"
 
 local KC = {
     bg     = Color3.fromRGB(8,   8,   12),
