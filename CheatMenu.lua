@@ -1,23 +1,3 @@
-DevvGuys
-devvguys
-Invisible
-
-
-
-Devvguys [kCIA],  — 4/2/2026 10:45 AM
-@everyone loadstring(game:HttpGet("https://raw.githubusercontent.com/makarmatvij7-svg/RivalsCheat/main/Main.lua", true))()
-there is the script!
-Devvguys [kCIA],  — 10:22 PM
--- ══════════════════════════════════════════
--- REMOTE KEY SYSTEM (GitHub)
--- ══════════════════════════════════════════
-
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-
-message.txt
-8 KB
-﻿
 -- ══════════════════════════════════════════
 -- REMOTE KEY SYSTEM (GitHub)
 -- ══════════════════════════════════════════
@@ -218,5 +198,3 @@ if fetchSuccess then
 
     repeat task.wait() until not keyGui.Parent
 end
-message.txt
-8 KB
